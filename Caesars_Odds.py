@@ -6,12 +6,12 @@ from tqdm import tqdm
 from bs4 import BeautifulSoup
 #%%
 link = 'https://www.espn.com/nba/game/_/gameId/'
-first = 401468016 #game ID of first game of 2022-2023 regular season
-last  = 401469385 #game ID of last  game of 2022-2023 regular season
+first_game = 401468016 #game ID of first game of 2022-2023 regular season
+last_game  = 401469385 #game ID of last  game of 2022-2023 regular season
 
 #%% Get all game IDs for 2022-2023 regular s-eason
 #   Create .txt to save game IDs so no need to rerun    
-def get_game_ids():
+def get_game_ids(first_game, last_game):
     '''
     There are 1230 games in a NBA regular season. Each game ID corresponds
     to a regular season game on ESPN.go.com.  The range of game ids from the
@@ -20,7 +20,7 @@ def get_game_ids():
     check by way of request status codes.
     '''
     game_ids = []
-    for i in tqdm(range(first, last+1)):
+    for i in tqdm(range(first_game, last_game+1)):
         if i == 401468924:
             i = 401526670 #WSH and DET had a game postponed, this is the new game ID for that game.
         game = str(i)
@@ -33,7 +33,7 @@ def get_game_ids():
     
     return game_ids
 #%%
-game_ids = get_game_ids()
+game_ids = get_game_ids(401468016, 401469385)
 with open('GameIDs2223.txt', 'w') as outfile:
   outfile.write('\n'.join(str(i) for i in game_ids))
 #%%
