@@ -33,13 +33,13 @@ def get_game_ids(first_game, last_game):
     
     return game_ids
 #%%
-game_ids = get_game_ids(401468016, 401469385)
-with open('GameIDs2223.txt', 'w') as outfile:
-  outfile.write('\n'.join(str(i) for i in game_ids))
-#%%
-game_ids = open('GameIDs2223.txt')
-game_ids = game_ids.read()
-game_ids = game_ids.split('\n')
+# game_ids = get_game_ids(401468016, 401469385)
+# with open('GameIDs2223.txt', 'w') as outfile:
+#   outfile.write('\n'.join(str(i) for i in game_ids))
+# #%%
+# game_ids = open('GameIDs2223.txt')
+# game_ids = game_ids.read()
+# game_ids = game_ids.split('\n')
 
 # %%
 def get_game_info():
@@ -136,12 +136,12 @@ def get_game_info():
 
     return game_lines
 #%%
-game_info = get_game_info()
-#%%
-caesars_lines = pd.read_csv('Caesars_Lines.csv', index_col= 0)
-caesars_lines = caesars_lines[['Date', 'Home', 'Away', 'Favorite', 'Spread']]
-caesars_lines[['Spread']] = caesars_lines[['Spread']].astype(float)
-caesars_lines
+# game_info = get_game_info()
+# #%%
+# caesars_lines = pd.read_csv('Caesars_Lines.csv', index_col= 0)
+# caesars_lines = caesars_lines[['Date', 'Home', 'Away', 'Favorite', 'Spread']]
+# caesars_lines[['Spread']] = caesars_lines[['Spread']].astype(float)
+# caesars_lines
 
 
 if __name__ == "__main__":
