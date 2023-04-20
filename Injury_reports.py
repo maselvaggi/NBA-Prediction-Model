@@ -1,4 +1,5 @@
 #%%
+import requests
 import pandas as pd
 from PyPDF2 import PdfReader
 # import numpy as np
@@ -7,21 +8,10 @@ from PyPDF2 import PdfReader
 # from lxml import html
 # from lxml import etree
 # from bs4 import BeautifulSoup
-# import requests
 # from selenium import webdriver
 # from selenium.webdriver.common.by import By
 
 # %% Now In USE:
-#This gets all the box score pdfs. May need to create a function to 
-#be more selective on which pdfs to get in the future.
-# for i in range(len(links2223)):
-#     direct = 'Box Scores/'
-#     response = requests.get(links2223[i])
-#     direct = ''.join([direct, file_names[i]])
-#     with open(direct, 'wb') as f:
-#         f.write(response.content)
-
-# %%
 def injury_df():
     """
     This function pulls the text from each downloaded PDF file.
@@ -187,6 +177,21 @@ def pdf_names():
 
     return file_names
 
+def pdf_download():
+    """
+    This downloads all the box score pdfs from the NBA for the 2022-2023 Season. 
+    May need to create a function to be more selective on which pdfs to get in the future.
+    """
+    links2223 = pdf_links()
+    file_names = pdf_names()
+
+    for i in range(len(links2223)):
+        direct = 'Box Scores/'
+        response = requests.get(links2223[i])
+        direct = ''.join([direct, file_names[i]])
+        with open(direct, 'wb') as f:
+            f.write(response.content)
+
 def pdf_links():
     """
     This function creates the links that will then be used to
@@ -318,3 +323,4 @@ if __name__ == "__main__":
     injury_df()
     pdf_names()
     pdf_links()
+    pdf_download()
