@@ -98,8 +98,9 @@ def clean_allAdv(A_box_scores):
     return A_box_scores
 
 #%%
-def scrape_new_ADV():
-    """This function scrapes a specified number of pages of advanced stats from NBA.com.
+def scrape_new_ADV(pages):
+    """
+    This function scrapes a specified number of pages of advanced stats from NBA.com.
     Remember to toggle the number of pages as you see fit.
     """
     options = webdriver.ChromeOptions()
@@ -121,7 +122,7 @@ def scrape_new_ADV():
     time.sleep(30)        
     
     A_tables = []
-    for i in range(1, 15):
+    for i in range(1, pages+1):
         text = driver.find_element_by_xpath('//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[3]/table/tbody').text
         A_tables.append(text)
         driver.find_element_by_xpath('//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[5]/button[2]').click()
@@ -221,58 +222,6 @@ def remove_duplicates(data):
     for i in duplicates:
         data = data.drop(index = i[0])    
     return data
-
-#%%
-def Trad_seasonal_stats(advanced):
-    
-    players = advanced['Name'].unique()
-    
-    for i in range(len(players)):
-        guy = advanced[advanced['Name'] == players[i]]
-        season = []
-        GP = len(guy['Name'])
-
-        season.append(guy['Name'].iloc[0])
-        season.append(guy['Team'].iloc[0])
-        season.append('2022-2023')
-        season.append(GP)
-        season.append((len(guy[guy['Result']=='W'])/GP)*100) #Win %
-        season.append((guy['Mins'].sum()/GP))
-        season.append((guy['Points'].sum()/GP))
-        season.append((guy['Points'].sum()/guy['Mins'].sum())) #PPM
-        season.append((guy['FGM'].sum()/GP))
-        season.append((guy['FGA'].sum()/GP))
-        season.append((guy['FGM'].sum()/guy['FGA'].sum())*100) #FG%
-        season.append((guy['3PM'].sum()/GP))
-        season.append((guy['3PA'].sum()/GP))
-        season.append((guy['3PM'].sum()/guy['3PA'].sum())*100) #3P%
-        season.append((guy['FTM'].sum()/GP))
-        season.append((guy['FTA'].sum()/GP))
-        season.append((guy['FTM'].sum()/guy['FTA'].sum())*100) #3P%
-        season.append((guy['OREB'].sum()/GP))
-        season.append((guy['DREB'].sum()/GP))
-        season.append((guy['REB'].sum()/GP))
-        season.append((guy['AST'].sum()/GP))
-        season.append((guy['STL'].sum()/GP))
-        season.append((guy['BLK'].sum()/GP))
-        season.append((guy['TOV'].sum()/GP))
-        season.append((guy['PF'].sum()/GP))
-        season.append((guy['Plusminus'].sum()))
-        
-        if i != 0:
-            new_player   = pd.DataFrame(season)
-            new_player   = new_player.T
-            new_player.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']
-            season_stats = pd.concat([new_player, season_stats], ignore_index=True, sort=False)
-            #season_stats = season_stats.reset_index()
-
-        else:
-            season_stats = pd.DataFrame(season)
-            season_stats = season_stats.T
-            season_stats.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']
-
-    season_stats.to_csv('Trad_Season_Stats.csv')    
-    return season_stats    
 
 #%%
 if __name__ == "__main__":

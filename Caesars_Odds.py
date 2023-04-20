@@ -143,7 +143,7 @@ def get_game_info():
 # caesars_lines[['Spread']] = caesars_lines[['Spread']].astype(float)
 # caesars_lines
 
-
+#%%
 if __name__ == "__main__":
     get_game_ids()
     get_game_info()

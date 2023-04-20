@@ -49,7 +49,7 @@ trad = scrape_new_Trad()
 trad
 
 #%%
-adv = scrape_new_ADV()
+adv = scrape_new_ADV(15)
 adv
 #%%
 test_t = traditional

@@ -214,8 +214,8 @@ def pdf_links():
     
     return links2223
 #%%
-injury_data = pd.read_csv('Injury_Data.csv', index_col = 0)
-injury_data
+# injury_data = pd.read_csv('Injury_Data.csv', index_col = 0)
+# injury_data
 
 
 
