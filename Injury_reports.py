@@ -163,7 +163,7 @@ def injury_df():
 
 def pdf_names():
     """
-    This fucntion pulls the matchups ffrom the schedule2223.csv
+    This fucntion pulls the matchups from the schedule2223.csv
     file and dates of those matchups to create the names of each 
     downloaded PDF.  These names are used to reference each saved
     PDF.

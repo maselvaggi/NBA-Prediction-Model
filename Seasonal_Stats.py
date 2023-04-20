@@ -6,15 +6,16 @@ import numpy as np
 def seasonal_stats():
     '''
     This functions creates the season stats for each playey in the form of a 
-    dataframe and also creates a .csv file in yor directory.  The function combines
+    dataframe and also creates a .csv file in your directory.  The function combines
     stats from the Traditional and Advanced .csv files.  
     
     There is one issue with the accuracy of labeling the corect team of the player.  
     If the player played for one team, then got traded to another but did not play a 
-    game for that team    due to injury- his old team will still be listed, ex. Khem Birch. 
+    game for that team due to injury- his old team will still be listed, ex. Khem Birch. 
 
-    The 'Team' column is based on the last team you played a game for.  Birch is on the
-    San Antonio Spurs, but his stats are listed under Toronto. 
+    The 'Team' column is based on the last team for which a player played in a game.  Birch is on the
+    San Antonio Spurs, but his stats are listed under Toronto. He was traded while injured in Toronto
+    and did not appear in any games while a member of SAS. This will be cleaned up eventually.
     '''
     traditional = pd.read_csv('Traditional.csv', index_col = 0)
     advanced = pd.read_csv('Advanced.csv', index_col = 0)
@@ -75,8 +76,8 @@ def seasonal_stats():
         season.append((guy['Plusminus'].sum()))
         
         if i != 0:
-            new_player   = pd.DataFrame(season)
-            new_player   = new_player.T
+            new_player = pd.DataFrame(season)
+            new_player = new_player.T
             new_player.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'TOV', 'AST/TO', 'STL', 'BLK', 'EFG%', 'TS%', 'OFFRTG', 'DEFRTG', 'NETRTG', 'PF', 'Plusminus']
             season_stats = pd.concat([new_player, season_stats], ignore_index=True, sort=False)
             #season_stats = season_stats.reset_index()
