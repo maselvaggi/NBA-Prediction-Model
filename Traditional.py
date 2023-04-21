@@ -2,6 +2,7 @@
 import pandas as pd
 import time
 from selenium import webdriver
+from remove_duplicates import *
 # from selenium.webdriver.common.by import By
 # from selenium.webdriver.support.ui import WebDriverWait
 # from selenium.webdriver.support import expected_conditions as EC
@@ -47,7 +48,7 @@ def scrape_all_Trad():
         
     driver.quit()
     
-    with open("Traditionalfile.txt", 'w') as file:
+    with open("output/Traditionalfile.txt", 'w') as file:
         for row in tables:
             s = "".join(map(str, row))
             file.write(s+'\n')
@@ -62,7 +63,7 @@ def scrape_all_Trad():
     df_T[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus' ]] = df_T[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']].apply(pd.to_numeric) 
     df_T[['FG%', '3P%', 'FT%']] = df_T[['FG%', '3P%', 'FT%']].astype(float)
     
-    df_T.to_csv('Traditional.csv')
+    df_T.to_csv('output/Traditional.csv')
 
 
     return df_T
@@ -73,7 +74,7 @@ def clean_all_Trad():
     I save the data in a txt file to have a copy, and it makes it easier to 
     view after splitting by new line.
     """
-    traditional = open('Traditionalfile.txt')
+    traditional = open('output/Traditionalfile.txt')
     traditional = traditional.read()
     T_game_logs = traditional.split("\n")
     T_game_logs.pop()
@@ -181,7 +182,7 @@ def scrape_new_Trad(pages):
         
     driver.quit()
     
-    with open("NewTraditionalfile.txt", 'w') as file:
+    with open("output/NewTraditionalfile.txt", 'w') as file:
         for row in tables:
             s = "".join(map(str, row))
             file.write(s+'\n')
@@ -203,13 +204,13 @@ def scrape_new_Trad(pages):
     #keeps old indexes as column. So I'm just overwriting it in a lazy way-- look into better way
     traditional = traditional[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'Points', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%','FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']]
     traditional = remove_duplicates(traditional)
-    traditional.to_csv('Traditional.csv')
+    traditional.to_csv('output/Traditional.csv')
     
     return traditional    
 
 def clean_new_Trad():
     
-    traditional = open('NewTraditionalfile.txt')
+    traditional = open('output/NewTraditionalfile.txt')
     traditional = traditional.read()
     T_game_logs = traditional.split("\n")
     T_game_logs.pop()
@@ -264,33 +265,7 @@ def Trad_format_rows(T_box_scores):
     
     return T_box_scores
 
-def remove_duplicates(data):
-    """
-    This function removes the duplicate rows that may be present after adding new rows to the
-    existing dataframe.  
-    """
-    names = data['Name'].unique()
-    fix_names = []
-    for i in names:
-        guy = data[data['Name'] == i]    
-        if len(guy['Name']) != len(guy['Date'].unique()):
-            fix_names.append(i)
-
-    #remove duplicate row for single date. Lower interger index value is correct (more recent)
-    duplicates = []
-    for i in fix_names:
-        guy = data[data['Name'] == i]
-        duplicates.append(guy.index[guy.duplicated(['Date'])].tolist())
-
-    for i in duplicates:
-        data = data.drop(index = i[0])    
-    return data
-
 # %%
 if __name__ == "__main__":
     scrape_all_Trad()
-    Trad_format_rows()
-    clean_all_Trad()
     scrape_new_Trad()
-    clean_new_Trad()
-    remove_duplicates()

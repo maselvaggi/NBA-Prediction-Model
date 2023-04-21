@@ -17,8 +17,8 @@ def seasonal_stats():
     San Antonio Spurs, but his stats are listed under Toronto. He was traded while injured in Toronto
     and did not appear in any games while a member of SAS. This will be cleaned up eventually.
     '''
-    traditional = pd.read_csv('Traditional.csv', index_col = 0)
-    advanced = pd.read_csv('Advanced.csv', index_col = 0)
+    traditional = pd.read_csv('output/Traditional.csv', index_col = 0)
+    advanced = pd.read_csv('output/Advanced.csv', index_col = 0)
     players = traditional['Name'].unique()
     
     for i in range(len(players)):
@@ -87,7 +87,7 @@ def seasonal_stats():
             season_stats = season_stats.T
             season_stats.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'TOV', 'AST/TO', 'STL', 'BLK', 'EFG%', 'TS%', 'OFFRTG', 'DEFRTG', 'NETRTG', 'PF', 'Plusminus']
 
-    season_stats.to_csv('Season_Stats.csv')    
+    season_stats.to_csv('output/Season_Stats.csv')    
     return season_stats
 
 #%%
