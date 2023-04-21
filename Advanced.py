@@ -1,15 +1,30 @@
 #%%
 import pandas as pd
-import numpy as np
 import time
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-import requests
 from selenium import webdriver
+# from selenium.webdriver.common.by import By
+# from selenium.webdriver.support.ui import WebDriverWait
+# from selenium.webdriver.support import expected_conditions as EC
+# import requests
 # %%
 def scrape_all_ADV():
-    
+    '''
+    This function will scrape all of the advavnced player box scores from the current nba regular
+    season up until today's date.  Using the ChromeDriver.exe, we are able to easily
+    parse through the tables of data and save the data in a .csv file and return a 
+    dataframe.
+
+    I only recommend using this function if you are starting out.  This function will
+    take a lot of time to run.  The time.sleep is put in there to be kind to NBA.com.
+
+    NBA.com has caught on to the script and will change the location of the pop up in
+    the xpath.  Highly recommend just waiting a second after the popup becomes visible
+    to see if the script can click out of the popup (if the script is successful, the 
+    popup will be exited almost immediately), if not, just click out of the pop up
+    yourself and the script will then be able to scrape all the necessay data.
+
+    If you do not click out of the popup, the script will stop and return an error.
+    '''
     driver = webdriver.Chrome()
     driver.get('https://www.nba.com/stats/players/boxscores-advanced')
     driver.implicitly_wait(25)
@@ -48,7 +63,10 @@ def scrape_all_ADV():
     return df_A
 
 def clean_all_ADV():
-    
+    """
+    This fucntion takes in the newly scraped advanced player box scores from the .txt file.
+    Then, the string is split by line, and then split by ' '.  
+    """
     advanced = open('Advancedfile.txt')
     advanced = advanced.read()
     A_game_logs = advanced.split("\n")
@@ -58,15 +76,22 @@ def clean_all_ADV():
     for i in range(len(A_game_logs)):
         A_box_scores.append(A_game_logs[i].split(" "))
     
-    all_adv_scores = clean_allAdv(A_box_scores)
+    all_adv_scores = Adv_format_rows(A_box_scores)
     
     return all_adv_scores
     
-def clean_allAdv(A_box_scores):
-
+def Adv_format_rows(A_box_scores):
+    """
+    The newly created list of lists is then cleaned according to if the player has a suffix
+    in their name or not.  The end goal is to create uniform length lists with which to create
+    a dataframe to then save to a .csv. 
+    """
     for i in range(len(A_box_scores)):
         player = []
-    
+
+        #Some players have a suffix such as Jr., Sr., 'II', 'III', etc
+        #When splitting each line by space, those player with a suffix
+        #will have an extra element length wise
         if len(A_box_scores[i]) == 24:
             player.append(A_box_scores[i][0] + " " + A_box_scores[i][1])
             player.append(A_box_scores[i][2])
@@ -156,7 +181,11 @@ def scrape_new_ADV(pages):
     return advanced
 
 def clean_new_ADV():
-    
+    """
+    The newly created list of lists is then cleaned according to if the player has a suffix
+    in their name or not.  The end goal is to create uniform length lists with which to create
+    a dataframe to then save to a .csv. 
+    """    
     advanced = open('NewAdvancedfile.txt')
     advanced = advanced.read()
     A_game_logs = advanced.split("\n")
@@ -166,46 +195,14 @@ def clean_new_ADV():
     for i in range(len(A_game_logs)):
         A_box_scores.append(A_game_logs[i].split(" "))
     
-    new_adv_scores = clean_newAdv(A_box_scores)
+    new_adv_scores = Adv_format_rows(A_box_scores)
     
     return new_adv_scores
     
-def clean_newAdv(A_box_scores):
-
-    for i in range(len(A_box_scores)):
-        player = []
-    
-        if len(A_box_scores[i]) == 24:
-            player.append(A_box_scores[i][0] + " " + A_box_scores[i][1])
-            player.append(A_box_scores[i][2])
-            
-            if A_box_scores[i][4] == "@":
-                player.append("A")
-            else:
-                player.append("H")
-                
-            player.append(A_box_scores[i][5])
-        
-            for j in range(6, 24):
-                player.append(A_box_scores[i][j])
-            A_box_scores[i] = player
-        else:
-            player.append(A_box_scores[i][0] + " " + A_box_scores[i][1] + " " + A_box_scores[i][2])
-            player.append(A_box_scores[i][3])
-        
-            if A_box_scores[i][5] == "@":
-                player.append("A")
-            else:
-                player.append("H")
-            
-            player.append(A_box_scores[i][6])
-            for j in range(7, len(A_box_scores[i])):
-                player.append(A_box_scores[i][j])
-        A_box_scores[i] = player    
-        
-    return A_box_scores
-
 def remove_duplicates(data):
+    """
+    This function just removes duplicate rows from the updated dataframe.
+    """
     names = data['Name'].unique()
     fix_names = []
     for i in names:
@@ -227,8 +224,7 @@ def remove_duplicates(data):
 if __name__ == "__main__":
     scrape_all_ADV()
     clean_all_ADV()
-    clean_allAdv()
+    Adv_format_rows()
     scrape_new_ADV()
     clean_new_ADV()
-    clean_newAdv()
     remove_duplicates()
