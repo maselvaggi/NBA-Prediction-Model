@@ -2,12 +2,28 @@
 import pandas as pd
 import time
 from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+# from selenium.webdriver.common.by import By
+# from selenium.webdriver.support.ui import WebDriverWait
+# from selenium.webdriver.support import expected_conditions as EC
 #%%
 def scrape_all_Trad():
+    '''
+    This function will scrape all of the player box scores from the current nba regular
+    season up until today's date.  Using the ChromeDriver.exe, we are able to easily
+    parse through the tables of data and save the data in a .csv file and return a 
+    dataframe.
 
+    I only recommend using this function if you are starting out.  This function will
+    take a lot of time to run.  The time.sleep is put in there to be kind to NBA.com.
+
+    NBA.com has caught on to the script and will change the location of the pop up in
+    the xpath.  Highly recommend just waiting a second after the popup becomes visible
+    to see if the script can click out of the popup (if the script is successful, the 
+    popup will be exited almost immediately), if not, just click out of the pop up
+    yourself and the script will then be able to scrape all the necessay data.
+
+    If you do not click out of the popup, the script will stop and return an error.
+    '''
     driver = webdriver.Chrome()
     driver.get('https://www.nba.com/stats/players/boxscores-traditional')
     driver.implicitly_wait(25)
@@ -20,7 +36,7 @@ def scrape_all_Trad():
     for element in options:
         pages.append(element.get_attribute("value"))
         
-    #Code to grab ALL DATA
+    #Code to grab all pages of data
     tables = []
 
     for i in range(1, len(pages)):
@@ -53,7 +69,10 @@ def scrape_all_Trad():
     
     
 def clean_all_Trad():
-    
+    """
+    I save the data in a txt file to have a copy, and it makes it easier to 
+    view after splitting by new line.
+    """
     traditional = open('Traditionalfile.txt')
     traditional = traditional.read()
     T_game_logs = traditional.split("\n")
@@ -63,16 +82,22 @@ def clean_all_Trad():
     for i in range(len(T_game_logs)):
         T_box_scores.append(T_game_logs[i].split(" "))
     
-    T_box_scores = all_Trad(T_box_scores)
+    T_box_scores = Trad_format_rows(T_box_scores)
     
     return T_box_scores
 
 
-def all_Trad(T_box_scores):
-
+def Trad_format_rows(T_box_scores):
+    """
+    This function formats each list eleemnt into a format that will be transformed into a dataframe
+    of all traditional stat box scores.
+    """
     for i in range(len(T_box_scores)):
         player = []
 
+        #Some players have a suffix such as Jr., Sr., 'II', 'III', etc
+        #When splitting each line by space, those player with a suffix
+        #will have an extra element length wise
         if len(T_box_scores[i]) == 28:
             player.append(T_box_scores[i][0] + " " + T_box_scores[i][1])
             player.append(T_box_scores[i][2])
@@ -105,8 +130,16 @@ def all_Trad(T_box_scores):
     return T_box_scores
 
 #%%
-def scrape_new_Trad():
-    
+def scrape_new_Trad(pages):
+    """
+    This fucntion does exactly the same as scrape_all_Trad() but you can specify
+    how many pages of player box scores you want to scrape.
+
+    Similar to scrape_all_trad(), make sure to see if the popup get closed out by the script.
+    After about a seceond, just click out of the popup and the script will run like normal.
+
+    If you do not click out of the script, there will be a error and the script will stop.
+    """
     options = webdriver.ChromeOptions()
     options.add_argument("start-maximized")
     options.add_argument("disable-infobars")
@@ -140,7 +173,7 @@ def scrape_new_Trad():
 
     tables = []
 
-    for i in range(1, 15):
+    for i in range(1, pages+1):
         text = driver.find_element_by_xpath('//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[3]/table/tbody').text
         tables.append(text)
         driver.find_element_by_xpath('//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[5]/button[2]').click()
@@ -185,15 +218,21 @@ def clean_new_Trad():
     for i in range(len(T_game_logs)):
         T_box_scores.append(T_game_logs[i].split(" "))
     
-    T_box_scores = new_Trad(T_box_scores)
+    T_box_scores = Trad_format_rows(T_box_scores)
     
     return T_box_scores
 
-def new_Trad(T_box_scores):
-
+def Trad_format_rows(T_box_scores):
+    """
+    This function builds a list of lists.  Each list within the larger list
+    will be a row in the dataframe.  
+    """
     for i in range(len(T_box_scores)):
         player = []
 
+        #Some players have a suffix such as Jr., Sr., 'II', 'III', etc
+        #When splitting each line by space, those player with a suffix
+        #will have an extra element length wise
         if len(T_box_scores[i]) == 28:
             player.append(T_box_scores[i][0] + " " + T_box_scores[i][1])
             player.append(T_box_scores[i][2])
@@ -226,6 +265,10 @@ def new_Trad(T_box_scores):
     return T_box_scores
 
 def remove_duplicates(data):
+    """
+    This function removes the duplicate rows that may be present after adding new rows to the
+    existing dataframe.  
+    """
     names = data['Name'].unique()
     fix_names = []
     for i in names:
@@ -246,9 +289,8 @@ def remove_duplicates(data):
 # %%
 if __name__ == "__main__":
     scrape_all_Trad()
-    all_Trad()
+    Trad_format_rows()
     clean_all_Trad()
     scrape_new_Trad()
     clean_new_Trad()
-    new_Trad()
     remove_duplicates()
