@@ -2,6 +2,7 @@
 import pandas as pd
 import time
 from selenium import webdriver
+from remove_duplicates import *
 # from selenium.webdriver.common.by import By
 # from selenium.webdriver.support.ui import WebDriverWait
 # from selenium.webdriver.support import expected_conditions as EC
@@ -46,7 +47,7 @@ def scrape_all_ADV():
     
     driver.quit()
 
-    with open("Advancedfile.txt", 'w') as file:
+    with open("output/Advancedfile.txt", 'w') as file:
         for row in A_tables:
             s = "".join(map(str, row))
             file.write(s+'\n')
@@ -58,7 +59,7 @@ def scrape_all_ADV():
                                            'DREB%', 'REB%', 'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE'])
     df_A[['Mins']] = df_A[['Mins']].apply(pd.to_numeric)
     df_A[['OFFRTG', 'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']] = df_A[['OFFRTG', 'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']].astype(float)
-    df_A.to_csv('Advanced.csv')
+    df_A.to_csv('output/Advanced.csv')
     
     return df_A
 
@@ -67,7 +68,7 @@ def clean_all_ADV():
     This fucntion takes in the newly scraped advanced player box scores from the .txt file.
     Then, the string is split by line, and then split by ' '.  
     """
-    advanced = open('Advancedfile.txt')
+    advanced = open('output/Advancedfile.txt')
     advanced = advanced.read()
     A_game_logs = advanced.split("\n")
     A_game_logs.pop()
@@ -155,7 +156,7 @@ def scrape_new_ADV(pages):
     
     driver.quit()
 
-    with open("NewAdvancedfile.txt", 'w') as file:
+    with open("output/NewAdvancedfile.txt", 'w') as file:
         for row in A_tables:
             s = "".join(map(str, row))
             file.write(s+'\n')
@@ -169,14 +170,14 @@ def scrape_new_ADV(pages):
     df_A_new[['Mins']] = df_A_new[['Mins']].apply(pd.to_numeric)
     df_A_new[['OFFRTG', 'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']] = df_A_new[['OFFRTG', 'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']].astype(float)
     
-    advanced_old = pd.read_csv("Advanced.csv")
+    advanced_old = pd.read_csv("output/Advanced.csv")
     advanced = pd.concat([df_A_new, advanced_old], ignore_index=True, sort=False)
     advanced = advanced[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'OFFRTG', 'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']]
     advanced = advanced.drop_duplicates().reset_index()
     #keeps old indexes as column. So I'm just overwriting it in a lazy way-- look into better way
     advanced = advanced[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'OFFRTG', 'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']]
     advanced = remove_duplicates(advanced)
-    advanced.to_csv('Advanced.csv')
+    advanced.to_csv('output/Advanced.csv')
     
     return advanced
 
@@ -186,7 +187,7 @@ def clean_new_ADV():
     in their name or not.  The end goal is to create uniform length lists with which to create
     a dataframe to then save to a .csv. 
     """    
-    advanced = open('NewAdvancedfile.txt')
+    advanced = open('output/NewAdvancedfile.txt')
     advanced = advanced.read()
     A_game_logs = advanced.split("\n")
     A_game_logs.pop()
@@ -201,7 +202,7 @@ def clean_new_ADV():
     
 def remove_duplicates(data):
     """
-    This function just removes duplicate rows from the updated dataframe.
+    This function removes duplicate rows from the updated dataframe.
     """
     names = data['Name'].unique()
     fix_names = []
@@ -223,8 +224,4 @@ def remove_duplicates(data):
 #%%
 if __name__ == "__main__":
     scrape_all_ADV()
-    clean_all_ADV()
-    Adv_format_rows()
     scrape_new_ADV()
-    clean_new_ADV()
-    remove_duplicates()

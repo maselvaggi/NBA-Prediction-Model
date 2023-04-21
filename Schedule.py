@@ -3,15 +3,23 @@ import pandas as pd
 
 #%%
 def create_schedule():
+    """
+    This function is able to create the entire NBA season schedule using the 
+    scraped data. 
+
+    Will need to create another function to create schedule for games that 
+    have not happend yet.  This would entail downloading a file from perhaps
+    NBA.com and doing some data cleaning on the text.  
+    """
     # Need advanced.csv in order to create schedule.csv
-    schedule = pd.read_csv('Advanced.csv', index_col = 0)
+    schedule = pd.read_csv('output/Advanced.csv', index_col = 0)
 
     schedule = schedule[['Date','Team', 'Location', 'Opponent', 'Result']]
     schedule = schedule.drop_duplicates()
     schedule = schedule[schedule['Location'] == "H"]
     
-    schedule.to_csv('Schedule2223.csv')
-    schedule = pd.read_csv('Schedule2223.csv', index_col=0)
+    schedule.to_csv('output/Schedule2223.csv')
+    schedule = pd.read_csv('output/Schedule2223.csv', index_col=0)
     
     return schedule
 

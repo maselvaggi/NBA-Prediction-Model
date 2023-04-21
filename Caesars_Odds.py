@@ -52,8 +52,9 @@ def get_game_info():
 
     Last, it creates a dataframe and .csv file.
      '''
+    link = 'https://www.espn.com/nba/game/_/gameId/'
     game_info = []
-    game_ids = open('GameIDs2223.txt')
+    game_ids = open('output/GameIDs2223.txt')
     game_ids = game_ids.read()
     game_ids = game_ids.split('\n')
 
@@ -132,7 +133,7 @@ def get_game_info():
             game_info[i][0] = game_info[i][0].replace(' ', '/')
 
     game_lines = pd.DataFrame(game_info, columns=['Date', 'Home', 'Away', 'Favorite', 'Spread', 'Attendance', 'Capacity'], index = None)
-    game_lines.to_csv('Caesars_Lines.csv')  
+    game_lines.to_csv('output/Caesars_Lines.csv')  
 
     return game_lines
 #%%

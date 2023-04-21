@@ -34,10 +34,10 @@ def injury_df():
         page = reader.pages[0]
         text = page.extract_text()
 
-        with open("Inactives.txt", 'w') as file:
+        with open("output/Inactives.txt", 'w') as file:
             file.write(text)
 
-        inactives = open('Inactives.txt')
+        inactives = open('output/Inactives.txt')
         inactives = inactives.read()
         inactives = inactives.split("\n")
 
@@ -148,7 +148,7 @@ def injury_df():
 
         print(i)    
 
-    injury_data.to_csv('Injury_Data.csv')    
+    injury_data.to_csv('output/Injury_Data.csv')    
     return injury_data
 
 def pdf_names():
@@ -158,7 +158,7 @@ def pdf_names():
     downloaded PDF.  These names are used to reference each saved
     PDF.
     """
-    schedule  = pd.read_csv('Schedule2223.csv', index_col = 0)
+    schedule  = pd.read_csv('output/Schedule2223.csv', index_col = 0)
     date = schedule['Date'].to_numpy()
     home = schedule['Team'].to_numpy()
     away = schedule['Opponent'].to_numpy()
@@ -186,7 +186,7 @@ def pdf_download():
     file_names = pdf_names()
 
     for i in range(len(links2223)):
-        direct = 'Box Scores/'
+        direct = 'output/Box Scores/'
         response = requests.get(links2223[i])
         direct = ''.join([direct, file_names[i]])
         with open(direct, 'wb') as f:
@@ -197,7 +197,7 @@ def pdf_links():
     This function creates the links that will then be used to
     download the needed PDF files locally.
     """
-    schedule  = pd.read_csv('Schedule2223.csv', index_col = 0)
+    schedule  = pd.read_csv('output/Schedule2223.csv', index_col = 0)
     date = schedule['Date'].to_numpy()
     home = schedule['Team'].to_numpy()
     away = schedule['Opponent'].to_numpy()
