@@ -7,11 +7,11 @@ def get_team_rotations():
     Here we are creating the average rotation size per team, per game.
 
     For a player to be considered part of the rotation for a particular
-    game, they had to have played more than 10mins.  This is to ensure 
+    game, they had to have played more than 10 mins.  This is to ensure 
     the exclusion of most garbage time minutes while including players
     who perhaps do not play as much as star player but do make an impact. 
 
-    A simplle moving average (sma) is created using a 10 game window.  
+    A simple moving average (sma) is created using a 10 game window.  
     The logic behind this is to take into account that rosters change 
     during the season, teams change their rotation size throughout the
     season, coaching changes bring different schemes in the building. 
@@ -46,10 +46,12 @@ def get_team_rotations():
     sma = []
     cma = []
     for i in teams:
-        sma_team = rotations[i].rolling(10).mean().to_numpy() #get simply moving average of 10 game window
+        #get simply moving average of 10 game window
+        sma_team = rotations[i].rolling(10).mean().to_numpy() 
         sma.append(sma_team)
-
-        cma_team = rotations[i].expanding().mean().to_numpy() #get cumulative moving average for the first 10 games
+        
+        #get cumulative moving average to replace nans in forst 10 rows of sma
+        cma_team = rotations[i].expanding().mean().to_numpy()
         cma.append(cma_team)
 
     sma = pd.DataFrame(sma)

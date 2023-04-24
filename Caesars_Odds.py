@@ -9,27 +9,28 @@ link = 'https://www.espn.com/nba/game/_/gameId/'
 first_game = 401468016 #game ID of first game of 2022-2023 regular season
 last_game  = 401469385 #game ID of last  game of 2022-2023 regular season
 
-#%% Get all game IDs for 2022-2023 regular s-eason
+#%% Get all game IDs for 2022-2023 regular season
 #   Create .txt to save game IDs so no need to rerun    
 def get_game_ids(first_game, last_game):
     '''
     There are 1230 games in a NBA regular season. Each game ID corresponds
     to a regular season game on ESPN.go.com.  The range of game ids from the
     first to last game of the regular season is larger than 1230.  So we 
-    need to figure out which game ids are valid-  that is what this function
-    check by way of request status codes.
+    need to figure out which game ids are valid-  this function checks the 
+    validity by way of comparing request status codes.
     '''
     game_ids = []
     for i in tqdm(range(first_game, last_game+1)):
         if i == 401468924:
-            i = 401526670 #WSH and DET had a game postponed, this is the new game ID for that game.
+            i = 401526670 #WSH and DET had a game postponed, this is the new game ID.
         game = str(i)
         url = ''.join([link, game])
         record = requests.get(url)
         if record.status_code == 200:
             game_ids.append(game)
 
-        time.sleep(0.5) #Just being kind to ESPN
+        #Just being kind to ESPN since they are the one website to not give me a hassle
+        time.sleep(0.5) 
     
     return game_ids
 #%%
@@ -100,6 +101,8 @@ def get_game_info():
         info = info.split('=')  
 
         game_info.append(info)
+
+        #I will be kind to your website, if you let me scrape easily :)
         time.sleep(0.5)
 
     for i in range(len(game_info)):
