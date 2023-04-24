@@ -17,6 +17,7 @@ def create_schedule():
     schedule = schedule[['Date','Team', 'Location', 'Opponent', 'Result']]
     schedule = schedule.drop_duplicates()
     schedule = schedule[schedule['Location'] == "H"]
+    schedule = schedule.reset_index(drop=True)
     
     schedule.to_csv('output/Schedule2223.csv')
     schedule = pd.read_csv('output/Schedule2223.csv', index_col=0)
