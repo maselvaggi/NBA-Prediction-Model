@@ -15,18 +15,16 @@ with the new code.  This code will be used to run the first backtest.
 """
 #%%
 def get_truncated_normal(mean=1, sd=1, low=0.5, upp=1.5):
-    return truncnorm(
-        (low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd)
+    return truncnorm((low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd)
 
 X = get_truncated_normal(mean=1, sd=1, low= 0.5, upp= 1.5)
-X.rvs()
+
 
 def def_truncated_normal(mean=1, sd=1, low=0.95, upp=1.05):
-    return truncnorm(
-        (low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd)
+    return truncnorm((low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd)
 
 Y = def_truncated_normal(mean=1, sd=1, low=0.95, upp=1.05)
-Y.rvs()
+
 
 #%%
 #American betting odds for home and away teams
@@ -38,6 +36,7 @@ def USA_home(decimal_home):
     
     return american_home
 
+
 def USA_away(decimal_away):
     if decimal_away >= 2:
         american_away = (decimal_away - 1)*100
@@ -45,6 +44,7 @@ def USA_away(decimal_away):
         american_away = (-100)/(decimal_away-1)
     
     return american_away
+
 
 def odds(df_outcomes, away, home):
     #wins = 0
@@ -94,15 +94,14 @@ def Minutes(mpg, rotation_size):
     return mpg
 
 #%%
-def points_home(proj_pts_home, mpg_home, ppm_home, drtg_bos):
+def points_home(proj_pts_home, mpg_home, ppm_home, drtg_bos, drtg_mean):
     for i in range(len(proj_pts_home)):
         proj_pts_home[i] = (mpg_home[i]*ppm_home[i]*X.rvs()) * ((drtg_bos/drtg_mean)*Y.rvs())
     
-    return sum(proj_pts_home) + 1.5
+    return sum(proj_pts_home) + 1.5    
     
-    
-    
-def points_away(proj_pts_away, mpg_away, ppm_away, drtg_bkn):
+
+def points_away(proj_pts_away, mpg_away, ppm_away, drtg_bkn, drtg_mean):
     for i in range(len(proj_pts_away)):
         proj_pts_away[i] = (mpg_away[i]*ppm_away[i]*X.rvs()) * ((drtg_bkn/drtg_mean)*Y.rvs())
     
@@ -123,9 +122,23 @@ def drtg_away(drtg_bos, mpg_away, bos_drtg, rotation_size_away):
     
     return sum(drtg_bos)
 
+
+def def_rtg_mean(season_stats):
+
+    tot_mins = season_stats['Mins'].sum()
+    mins = season_stats['Mins'].to_numpy()
+    defrtg = season_stats['DEFRTG'].to_numpy()
+    ratios = mins/tot_mins
+    defrtg = ratios*defrtg
+    defrtg_mean = sum(defrtg)
+
+    return defrtg_mean
+
 #%%
-def official_projections(home, injury_report_home, rotation_size_home, away, injury_report_away, rotation_size_away):
-    bkn = data.loc[data['TEAM'] == home]
+def official_projections(season_stats, home, injury_report_home, rotation_size_home, away, injury_report_away, rotation_size_away):
+    drtg_mean = def_rtg_mean(season_stats)
+
+    bkn = season_stats.loc[season_stats['TEAM'] == home]
     bkn = bkn.sort_values(by='MPG', ascending=False)
     if injury_report_home != []:
         bkn = bkn[~bkn['NAME'].isin(injury_report_home)] #returns all rows not including those in injury report
@@ -133,7 +146,7 @@ def official_projections(home, injury_report_home, rotation_size_home, away, inj
     bkn["DRtg"] = bkn["DRtg"].fillna(drtg_mean)
     bkn_drtg = bkn["DRtg"][0:rotation_size_home].to_numpy()    
     
-    bos = data.loc[data['TEAM'] == away]
+    bos = season_stats.loc[season_stats['TEAM'] == away]
     bos = bos.sort_values(by='MPG', ascending=False)
     if injury_report_away != []:
         bos = bos[~bos['NAME'].isin(injury_report_away)] #returns all rows not including those in injury report
@@ -158,19 +171,19 @@ def official_projections(home, injury_report_home, rotation_size_home, away, inj
     proj_pts_home = np.full(rotation_size_home,0)
     proj_pts_away = np.full(rotation_size_away,0)
 
-    HMPTS = points_home(proj_pts_home, mpg_home, ppm_home, drtg_bos)
-    AWPTS = points_away(proj_pts_away, mpg_away, ppm_away, drtg_bkn)
+    HMPTS = points_home(proj_pts_home, mpg_home, ppm_home, drtg_bos, drtg_mean)
+    AWPTS = points_away(proj_pts_away, mpg_away, ppm_away, drtg_bkn, drtg_mean)
     
-
     return HMPTS, AWPTS
     
+
 def matchup(home, injury_report_home, rotation_size_home, away, injury_report_away, rotation_size_away):
-    t0 = time.time()
     proj_away = np.full(1500,1.0)
     proj_home = np.full(1500,1.0)
+    season_stats = pd.read_csv('output/Backtest_Stats.csv', index_col=0)
 
     for i in range(len(proj_away)):
-        proj_home[i], proj_away[i] = official_projections(home, injury_report_home, rotation_size_home, away, injury_report_away, rotation_size_away)
+        proj_home[i], proj_away[i] = official_projections(season_stats, home, injury_report_home, rotation_size_home, away, injury_report_away, rotation_size_away)
         
     df_outcomes = pd.DataFrame(data=[proj_home, proj_away]).T
     df_outcomes.columns = ("Home", "Away")
@@ -178,8 +191,10 @@ def matchup(home, injury_report_home, rotation_size_home, away, injury_report_aw
     
     game_odds = odds(df_outcomes, away, home)
     
-    t1 = time.time()
 
-    total = t1-t0
 
-    return game_odds, total
+
+    return game_odds
+
+if __name__=='__main__':
+    matchup()
