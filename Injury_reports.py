@@ -1,6 +1,7 @@
 #%%
 import requests
 import pandas as pd
+from tqdm import tqdm
 from PyPDF2 import PdfReader
 # import numpy as np
 # import re
@@ -25,9 +26,9 @@ def injury_df():
     #you need advanced.csv and schedule.csv to run this function
     file_names = pdf_names()
 
-    for i in range(len(file_names)):
+    for i in tqdm(range(len(file_names))):
         name = file_names[i]
-        path = 'Box Scores'
+        path = 'output/Box Scores'
         path = '/'.join([path,name])
 
         reader = PdfReader(path)
@@ -50,7 +51,6 @@ def injury_df():
             else:
                 pass
         indexes
-
         injuries = []
         for b in range(indexes[0], indexes[-1]):
             injuries.append(inactives[b])
@@ -99,7 +99,9 @@ def injury_df():
                 injury[j] = ", ".join([injury[j],DNP[g]])
 
         for h in range(0,2):
-            injury[h] = injury[h].split(', ')
+            #changed how I split to make sure entire injury is listed
+            injury[h] = injury[h].replace('),', ') =')
+            injury[h] = injury[h].split(' = ')
 
         injury_away = injury[0]
         injury_home = injury[1]
@@ -132,21 +134,18 @@ def injury_df():
 
         for m in range(len(injury)):
             injury[m] = injury[m].replace(' = ','=').replace(' (', '=').replace(')','')
-
-        for n in range(len(injury)):
-            injury[n] = injury[n].split('=')
+            injury[m] = injury[m].split('=')
 
         for o in range(len(injury)):
-            if len(injury[o]) == 5:
+            if len(injury[o]) != 4:
                 injury[o] = injury[o][0:3]
 
         if i !=0:
             temp_injury = pd.DataFrame(injury, columns=['Date', 'Team', 'Player', 'Injury'], index = None)
             injury_data = pd.concat([temp_injury, injury_data], ignore_index = True)
         else:
-            injury_data = pd.DataFrame(injury, columns=['Date', 'Team', 'Player', 'Injury'], index = None)
-
-        print(i)    
+          injury_data = pd.DataFrame(injury, columns=['Date', 'Team', 'Player', 'Injury'], index = None)
+          injury_data
 
     injury_data.to_csv('output/Injury_Data.csv')    
     return injury_data
@@ -218,12 +217,6 @@ def pdf_links():
         links2223.append(link)
     
     return links2223
-#%%
-# injury_data = pd.read_csv('Injury_Data.csv', index_col = 0)
-# injury_data
-
-
-
 #%% No Longer In Use But Leaving for Reference:
 # url = 'https://hoopshype.com/lists/nba-injuries-tracker/'
 # record = requests.get(url)
