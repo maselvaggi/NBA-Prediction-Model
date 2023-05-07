@@ -97,11 +97,18 @@ def injury_df():
                 j +=1
             else:
                 injury[j] = ", ".join([injury[j],DNP[g]])
+                
+        # Recombines injuries that got split at ','
+        # Also makes sure players with no injuries listed
+        # are not attached to another row,
+        for n in range(0,2):
+            injury[n] = injury[n].split(', ')
+            for p in range(len(injury[n])):
+                if '(' not in injury[n][p] and ')' in injury[n][p]:
+                    injury[n][p-1] = ', '.join([injury[n][p-1],injury[n][p]])
+                    injury[n][p].replace(')', '==')
 
-        for h in range(0,2):
-            #changed how I split to make sure entire injury is listed
-            injury[h] = injury[h].replace('),', ') =')
-            injury[h] = injury[h].split(' = ')
+            injury[n] = [x for x in injury[n] if '==' not in x]
 
         injury_away = injury[0]
         injury_home = injury[1]
@@ -139,6 +146,7 @@ def injury_df():
         for o in range(len(injury)):
             if len(injury[o]) != 4:
                 injury[o] = injury[o][0:3]
+
 
         if i !=0:
             temp_injury = pd.DataFrame(injury, columns=['Date', 'Team', 'Player', 'Injury'], index = None)
@@ -217,6 +225,7 @@ def pdf_links():
         links2223.append(link)
     
     return links2223
+
 #%% No Longer In Use But Leaving for Reference:
 # url = 'https://hoopshype.com/lists/nba-injuries-tracker/'
 # record = requests.get(url)
