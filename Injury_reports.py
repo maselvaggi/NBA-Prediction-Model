@@ -103,12 +103,13 @@ def injury_df():
         # are not attached to another row,
         for n in range(0,2):
             injury[n] = injury[n].split(', ')
+            remove = []
             for p in range(len(injury[n])):
                 if '(' not in injury[n][p] and ')' in injury[n][p]:
                     injury[n][p-1] = ', '.join([injury[n][p-1],injury[n][p]])
                     injury[n][p].replace(')', '==')
-
-            injury[n] = [x for x in injury[n] if '==' not in x]
+                    remove.append(p)
+            injury[n] = [x for y, x in enumerate(injury[n]) if y not in remove]
 
         injury_away = injury[0]
         injury_home = injury[1]
