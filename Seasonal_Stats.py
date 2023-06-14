@@ -1,6 +1,7 @@
 #%%
 import pandas as pd
 import numpy as np
+from tqdm import tqdm
 
 # %%
 def seasonal_stats():
@@ -99,16 +100,16 @@ def partial_seasonal_stats():
     # Use first 20% of games to normalize stats
     dates = dates[0:132] 
 
-    for i in dates:
+    for i in tqdm(range(len(dates))):
         trad = traditional
-        tstats = trad[trad['Date'] == i].index
+        tstats = trad[trad['Date'] == dates[i]].index
         trad = trad.iloc[tstats[-1]+1:]
 
         adv = advanced
-        astats = advanced[advanced['Date'] == i].index
+        astats = advanced[advanced['Date'] == dates[i]].index
         adv = adv.iloc[astats[-1]+1:]
 
-        daily_seasonal_stats(adv, trad, i)
+        daily_seasonal_stats(adv, trad, dates[i])
 
     return True
     
@@ -181,13 +182,27 @@ def daily_seasonal_stats(advanced, traditional, date):
             season_stats = season_stats.T
             season_stats.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'TOV', 'AST/TO', 'STL', 'BLK', 'EFG%', 'TS%', 'OFFRTG', 'DEFRTG', 'NETRTG', 'PF', 'Plusminus']
     
-    date = date.replace('/', '_')
+    date = date.split('/')
+    if date[0][0] == '0':
+        date[0] = date[0].replace('0', '')
+    if date[1][0] == '0':
+        date[1] = date[1].replace('0', '')
+    date = '_'.join([date[0], date[1], date[2]])
     date = ''.join([date, '.csv'])
     directory = 'output/Seasonal Stats'
     location = '/'.join([directory, date])
     season_stats.to_csv(location)
 
     return True
+
+#%%
+partial_seasonal_stats()
+
+#%%
+traditional = pd.read_csv('output/Traditional.csv', index_col = 0)
+dates = traditional['Date'].unique()
+
+dates[0][0]
 
 #%%
 #def correct_player_team(date, season_stats, teams, injuries):

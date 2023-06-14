@@ -19,6 +19,7 @@ def injury_df():
     #you need advanced.csv and schedule.csv to run this function
     file_names = pdf_names()
     schedule = pd.read_csv('output/Schedule2223.csv', index_col=0)
+    not_injured = pd.read_csv('output/Traditional.csv', index_col=0)
 
     for i in tqdm(range(len(file_names))):
         date = file_names[i].replace('_', '/').replace('.pdf', '')
@@ -437,8 +438,23 @@ def injury_df():
 
     injury_data = injury_data.drop_duplicates(subset = ['Date','Name'], keep = 'first' )
 
-    injury_data.to_csv('output/Injury_Data.csv')    
-    return injury_data
+    dates = not_injured['Date'].unique()
+
+    for i in tqdm(range(len(dates))):
+        #removes players who played but listed in IR
+        temp = not_injured[not_injured['Date'] == dates[i]]
+        players = temp['Name'].unique()
+
+        temp = injury_data[injury_data['Date'] == dates[i]]
+        temp = temp[~temp['Name'].isin(players)]
+
+        if i !=0:
+            new_injury_data = pd.concat([temp, new_injury_data], ignore_index=True)
+        else:
+            new_injury_data = temp
+
+    new_injury_data.to_csv('output/Injury_Data.csv')    
+    return new_injury_data
 
 #%%
 def pdf_names():
@@ -495,11 +511,7 @@ def pdf_links():
         links2223.append(link)
     
     return links2223
-#%%
-injury_data = injury_df()
 
-#%%
-injury_data
 #%%
 # These functions are only used to gather DNP/DNDs. Regular Injury Reports
 # do not include players who do not see the court. 

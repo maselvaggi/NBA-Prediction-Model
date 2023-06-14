@@ -34,6 +34,7 @@ def get_game_ids(first_game, last_game):
     
     return game_ids
 #%%
+game_ids = get_game_ids()
 # game_ids = get_game_ids(401468016, 401469385)
 # with open('GameIDs2223.txt', 'w') as outfile:
 #   outfile.write('\n'.join(str(i) for i in game_ids))
@@ -58,6 +59,7 @@ def get_game_info():
     game_ids = open('output/GameIDs2223.txt')
     game_ids = game_ids.read()
     game_ids = game_ids.split('\n')
+    game_ids[768] = '401526670'
 
     for i in tqdm(range(0, len(game_ids))):
         url = ''.join([link, game_ids[i]])
@@ -136,11 +138,14 @@ def get_game_info():
             game_info[i][0] = game_info[i][0].replace(' ', '/')
 
     game_lines = pd.DataFrame(game_info, columns=['Date', 'Home', 'Away', 'Favorite', 'Spread', 'Attendance', 'Capacity'], index = None)
+    game_lines = game_lines.replace(to_replace='WSH', value='WAS').replace(to_replace='SA', value = 'SAS').replace(to_replace='NY', value='NYK').replace(to_replace='NO', value='NOP').replace(to_replace='GS', value='GSW').replace(to_replace='UTAH', value='UTA')
     game_lines.to_csv('output/Caesars_Lines.csv')  
 
     return game_lines
 #%%
-# game_info = get_game_info()
+game_info = get_game_info()
+game_info
+
 # #%%
 # caesars_lines = pd.read_csv('Caesars_Lines.csv', index_col= 0)
 # caesars_lines = caesars_lines[['Date', 'Home', 'Away', 'Favorite', 'Spread']]
