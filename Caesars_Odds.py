@@ -34,7 +34,7 @@ def get_game_ids(first_game, last_game):
     
     return game_ids
 #%%
-game_ids = get_game_ids()
+game_ids = get_game_ids(401468016, 401469385)
 # game_ids = get_game_ids(401468016, 401469385)
 # with open('GameIDs2223.txt', 'w') as outfile:
 #   outfile.write('\n'.join(str(i) for i in game_ids))
@@ -105,7 +105,7 @@ def get_game_info():
         game_info.append(info)
 
         #I will be kind to your website, if you let me scrape easily :)
-        time.sleep(0.5)
+        time.sleep(5)
 
     for i in range(len(game_info)):
         if 'October' in game_info[i][0]:

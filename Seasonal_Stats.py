@@ -75,18 +75,23 @@ def seasonal_stats():
         season.append(num1-num2)
         season.append((guy['PF'].sum()/GP))
         season.append((guy['Plusminus'].sum()))
+        #Calculate season Player Impact Estimator
+        stat = guy_a['PIE'].to_numpy()
+        stat = stat*ratios
+        num  = sum(stat)
+        season.append(num)
         
         if i != 0:
             new_player = pd.DataFrame(season)
             new_player = new_player.T
-            new_player.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'TOV', 'AST/TO', 'STL', 'BLK', 'EFG%', 'TS%', 'OFFRTG', 'DEFRTG', 'NETRTG', 'PF', 'Plusminus']
+            new_player.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'TOV', 'AST/TO', 'STL', 'BLK', 'EFG%', 'TS%', 'OFFRTG', 'DEFRTG', 'NETRTG', 'PF', 'Plusminus', 'PIE']
             season_stats = pd.concat([new_player, season_stats], ignore_index=True, sort=False)
             #season_stats = season_stats.reset_index()
 
         else:
             season_stats = pd.DataFrame(season)
             season_stats = season_stats.T
-            season_stats.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'TOV', 'AST/TO', 'STL', 'BLK', 'EFG%', 'TS%', 'OFFRTG', 'DEFRTG', 'NETRTG', 'PF', 'Plusminus']
+            season_stats.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'TOV', 'AST/TO', 'STL', 'BLK', 'EFG%', 'TS%', 'OFFRTG', 'DEFRTG', 'NETRTG', 'PF', 'Plusminus', 'PIE']
 
     season_stats.to_csv('output/Season_Stats.csv')    
     return season_stats
@@ -169,18 +174,23 @@ def daily_seasonal_stats(advanced, traditional, date):
         season.append(num1-num2)
         season.append((guy['PF'].sum()/GP))
         season.append((guy['Plusminus'].sum()))
-        
+        #Calculate season Player Impact Estimator
+        stat = guy_a['PIE'].to_numpy()
+        stat = stat*ratios
+        num  = sum(stat)
+        season.append(num)
+
         if i != 0:
             new_player = pd.DataFrame(season)
             new_player = new_player.T
-            new_player.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'TOV', 'AST/TO', 'STL', 'BLK', 'EFG%', 'TS%', 'OFFRTG', 'DEFRTG', 'NETRTG', 'PF', 'Plusminus']
+            new_player.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'TOV', 'AST/TO', 'STL', 'BLK', 'EFG%', 'TS%', 'OFFRTG', 'DEFRTG', 'NETRTG', 'PF', 'Plusminus', 'PIE']
             season_stats = pd.concat([new_player, season_stats], ignore_index=True, sort=False)
             #season_stats = season_stats.reset_index()
 
         else:
             season_stats = pd.DataFrame(season)
             season_stats = season_stats.T
-            season_stats.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'TOV', 'AST/TO', 'STL', 'BLK', 'EFG%', 'TS%', 'OFFRTG', 'DEFRTG', 'NETRTG', 'PF', 'Plusminus']
+            season_stats.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'TOV', 'AST/TO', 'STL', 'BLK', 'EFG%', 'TS%', 'OFFRTG', 'DEFRTG', 'NETRTG', 'PF', 'Plusminus', 'PIE']
     
     date = date.split('/')
     if date[0][0] == '0':
