@@ -1,6 +1,7 @@
 #%%
 import requests
 import pandas as pd
+from tqdm import tqdm
 from PyPDF2 import PdfReader
 # import numpy as np
 # import re
@@ -11,8 +12,514 @@ from PyPDF2 import PdfReader
 # from selenium import webdriver
 # from selenium.webdriver.common.by import By
 
-# %% Now In USE:
+#%%
 def injury_df():
+    """
+    """
+    #you need advanced.csv and schedule.csv to run this function
+    file_names = pdf_names()
+    schedule = pd.read_csv('output/Schedule2223.csv', index_col=0)
+    not_injured = pd.read_csv('output/Traditional.csv', index_col=0)
+
+    for i in tqdm(range(len(file_names))):
+        date = file_names[i].replace('_', '/').replace('.pdf', '')
+        day = schedule[schedule['Date'] == date]
+        day_teams = list(day['Team'].unique()) + list(day['Opponent'].unique())
+        
+        path = 'output/Injury Reports/'
+        path = ''.join([path, file_names[i]])
+        reader = PdfReader(path)
+        len(reader.pages)
+        inactives = []
+        for a in range(len(reader.pages)):
+            text = reader.pages[a].extract_text()
+
+            with open("output/Inactives.txt", 'w') as file:
+                file.write(text)
+
+            temp = open('output/Inactives.txt')
+            temp = temp.read()
+            temp = temp.split("\n")
+
+            inactives = inactives + temp
+
+        for b in range(len(inactives)):
+            if '(' not in inactives[b] and ')' in inactives[b]:
+                inactives[b-1] = ' '.join([inactives[b-1], inactives[b]])
+
+        inactives = [h for h in inactives if ',' in h]
+
+        for c in range(len(inactives)):
+            if ' Out ' in inactives[c]:
+                inactives[c] = inactives[c].split(' Out ')
+            elif ' Doubtful ' in inactives[c]:
+                inactives[c] = inactives[c].split(' Doubtful ')
+            elif ' Questionable ' in inactives[c]:
+                inactives[c] = inactives[c].split(' Questionable ')
+            elif ' Probable ' in inactives[c]:
+                inactives[c] = inactives[c].split(' Probable ')
+            elif ' Available ' in inactives[c]:
+                inactives[c] = inactives[c].split(' Available ')   
+            elif ' Out' in inactives[c]:
+                inactives[c] = inactives[c].split(' Out')
+            elif ' Doubtful' in inactives[c]:
+                inactives[c] = inactives[c].split(' Doubtful')             
+            elif ' Questionable' in inactives[c]:
+                inactives[c] = inactives[c].split(' Questionable')
+            elif ' Probable' in inactives[c]:
+                inactives[c] = inactives[c].split(' Probable')
+            elif ' Available' in inactives[c]:
+                inactives[c] = inactives[c].split(' Available')
+
+        for d in range(len(inactives)):
+            if 'Celtics' in inactives[d][0]:
+                if ' Celtics ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Celtics ')
+                    inactives[d][0] = temp[1]
+                    inactives[d] = 'BOS&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Celtics')
+                    inactives[d][0] = temp[1]
+                    inactives[d] = 'BOS&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Nets' in inactives[d][0]:
+                if ' Nets ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Nets ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'BKN&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Nets')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'BKN&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Knicks' in inactives[d][0]:
+                if ' Knicks ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Knicks ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'NYK&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Knicks')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'NYK&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif '76ers' in inactives[d][0]:
+                if ' 76ers ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' 76ers ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'PHI&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' 76ers')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'PHI&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')    
+            elif 'Raptors' in inactives[d][0]:
+                if ' Raptors ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Raptors ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'TOR&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Raptors')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'TOR&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Bulls' in inactives[d][0]:
+                if ' Bulls ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Bulls ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'CHI&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Bulls')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'CHI&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Bucks' in inactives[d][0]:
+                if ' Bucks ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Bucks ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'MIL&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Bucks')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'MIL&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Pacers' in inactives[d][0]:
+                if ' Pacers ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Pacers ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'IND&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Pacers')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'IND&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Cavaliers' in inactives[d][0]:
+                if ' Cavaliers ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Cavaliers ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'CLE&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Cavaliers')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'CLE&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Pistons' in inactives[d][0]:
+                if ' Pistons ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Pistons ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'DET&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Pistons')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'DET&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Hawks' in inactives[d][0]:
+                if ' Hawks ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Hawks ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'ATL&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Hawks')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'ATL&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')    
+            elif 'Heat' in inactives[d][0]:
+                if ' Heat ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Heat ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'MIA&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Heat')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'MIA&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Hornets' in inactives[d][0]:
+                if ' Hornets ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Hornets ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'CHA&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Hornets')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'CHA&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Magic' in inactives[d][0]:
+                if ' Magic ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Magic ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'ORL&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Magic')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'ORL&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Wizards' in inactives[d][0]:
+                if ' Wizards ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Wizards ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'WAS&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Wizards')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'WAS&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Warriors' in inactives[d][0]:
+                if ' Warriors ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Warriors ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'GSW&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Warriors')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'GSW&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Lakers' in inactives[d][0]:
+                if ' Lakers ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Lakers ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'LAL&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Lakers')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'LAL&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Suns' in inactives[d][0]:
+                if ' Suns ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Suns ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'PHX&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Suns')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'PHX&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Kings' in inactives[d][0]:
+                if ' Kings ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Kings ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'SAC&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Kings')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'SAC&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Clippers' in inactives[d][0]:
+                if ' Clippers ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Clippers ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'LAC&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Clippers')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'LAC&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Nuggets' in inactives[d][0]:
+                if ' Nuggets ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Nuggets ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'DEN&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Nuggets')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'DEN&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Timberwolves' in inactives[d][0]:
+                if ' Timberwolves ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Timberwolves ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'MIN&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Timberwolves')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'MIN&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Thunder' in inactives[d][0]:
+                if ' Thunder ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Thunder ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'OKC&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Thunder')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'OKC&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Blazers' in inactives[d][0]:
+                if ' Blazers ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Blazers ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'POR&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Blazers')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'POR&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Jazz' in inactives[d][0]:
+                if ' Jazz ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Jazz ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'UTA&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Jazz')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'UTA&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Mavericks' in inactives[d][0]:
+                if ' Mavericks ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Mavericks ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'DAL&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Mavericks')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'DAL&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Spurs' in inactives[d][0]:
+                if ' Spurs ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Spurs ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'SAS&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Spurs')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'SAS&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Rockets' in inactives[d][0]:
+                if ' Rockets ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Rockets ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'HOU&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Rockets')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'HOU&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Grizzlies' in inactives[d][0]:
+                if ' Grizzlies ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Grizzlies ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'MEM&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Grizzlies')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'MEM&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+            elif 'Pelicans' in inactives[d][0]:
+                if ' Pelicans ' in inactives[d][0]:
+                    temp = inactives[d][0].split(' Pelicans ')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'NOP&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+                else:
+                    temp = inactives[d][0].split(' Pelicans')
+                    inactives[d][0] = temp[1]        
+                    inactives[d] = 'NOP&' + inactives[d][0]+ '&' + inactives[d][1]
+                    inactives[d] = inactives[d].split('&')
+
+        for e in range(len(inactives)):
+            if len(inactives[e]) == 3:
+                temp = inactives[e][0]
+            if len(inactives[e]) == 2:
+                inactives[e] = temp + '&' + inactives[e][0] + '&' + inactives[e][1]
+                inactives[e] = inactives[e].split('&')
+            else:
+                pass
+
+        inactives = [f for f in inactives if len(f) == 3]
+
+        #last, first --> first last
+        for g in range(len(inactives)):
+            temp = inactives[g][1]
+            temp = temp.split(', ')
+            temp = temp[1] + ' ' + temp[0]
+            inactives[g][1] = temp
+
+        
+
+        date = file_names[i]
+        date = date.replace('_', '/').replace('.pdf', '')
+        for h in range(len(inactives)):
+            inactives[h].insert(0, date)
+
+        if i !=0:
+            inactives = pd.DataFrame(inactives, columns=['Date', 'Team', 'Name', 'Injury'], index = None)
+            inactives = inactives[inactives['Team'].isin(day_teams)]
+            injury_data = pd.concat([inactives, injury_data], ignore_index = True)
+        else:
+            injury_data = pd.DataFrame(inactives, columns=['Date', 'Team', 'Name', 'Injury'], index = None)
+            injury_data = injury_data[injury_data['Team'].isin(day_teams)]
+
+    injury_data = injury_data.drop_duplicates(subset = ['Date','Name'], keep = 'first' )
+
+    dates = not_injured['Date'].unique()
+
+    for i in tqdm(range(len(dates))):
+        #removes players who played but listed in IR
+        temp = not_injured[not_injured['Date'] == dates[i]]
+        players = temp['Name'].unique()
+
+        temp = injury_data[injury_data['Date'] == dates[i]]
+        temp = temp[~temp['Name'].isin(players)]
+
+        if i !=0:
+            new_injury_data = pd.concat([temp, new_injury_data], ignore_index=True)
+        else:
+            new_injury_data = temp
+
+    new_injury_data.to_csv('output/Injury_Data.csv')    
+    return new_injury_data
+
+#%%
+def pdf_names():
+    """
+    This fucntion pulls the matchups from the schedule2223.csv
+    file and dates of those matchups to create the names of each 
+    downloaded PDF.  These names are used to reference each saved
+    PDF.
+    """
+    schedule  = pd.read_csv('output/Schedule2223.csv', index_col = 0)
+    file_names = schedule['Date'].unique()
+
+    for i in range(len(file_names)):
+        day = file_names[i].replace('/', '_')
+        day = ''.join([day, '.pdf'])
+        file_names[i] = day
+
+    return file_names
+
+def pdf_download():
+    """
+    This downloads all the box score pdfs from the NBA for the 2022-2023 Season. 
+    May need to create a function to be more selective on which pdfs to get in the future.
+    """
+    links2223 = pdf_links()
+    file_names = pdf_names()
+
+    for i in tqdm(range(len(links2223))):
+        direct = 'output/Injury Reports/'
+        response = requests.get(links2223[i])
+        direct = ''.join([direct, file_names[i]])
+        with open(direct, 'wb') as f:
+            f.write(response.content)
+
+def pdf_links():
+    """
+    This function creates the links that will then be used to
+    download the needed PDF files locally.
+    """
+    schedule  = pd.read_csv('output/Schedule2223.csv', index_col = 0)
+    date = schedule['Date'].unique()
+
+    for i in range(len(date)):
+        day = date[i].split('/')
+        day = "-".join([day[2], day[0], day[1]])
+        date[i] = day
+
+    links2223 = []
+
+    for i in range(len(date)):
+        link = "https://ak-static.cms.nba.com/referee/injury/Injury-Report_"
+        link = "".join([link, date[i]])
+        link = "".join([link, '_09PM.pdf'])
+        links2223.append(link)
+    
+    return links2223
+
+#%%
+# These functions are only used to gather DNP/DNDs. Regular Injury Reports
+# do not include players who do not see the court. 
+# This used the inactives in box scores from nba.com
+# the issue is that some players were listed without their full name
+# and this created tons of issues trying to verify who was who- especially
+# during trade season:
+def injury_DNP():
     """
     This function pulls the text from each downloaded PDF file.
     It grabs all players who are listed as DND/DNP/Inactive.
@@ -23,11 +530,11 @@ def injury_df():
     error.
     """
     #you need advanced.csv and schedule.csv to run this function
-    file_names = pdf_names()
+    file_names = old_pdf_names()
 
-    for i in range(len(file_names)):
+    for i in tqdm(range(len(file_names))):
         name = file_names[i]
-        path = 'Box Scores'
+        path = 'output/Box Scores'
         path = '/'.join([path,name])
 
         reader = PdfReader(path)
@@ -50,7 +557,6 @@ def injury_df():
             else:
                 pass
         indexes
-
         injuries = []
         for b in range(indexes[0], indexes[-1]):
             injuries.append(inactives[b])
@@ -97,9 +603,19 @@ def injury_df():
                 j +=1
             else:
                 injury[j] = ", ".join([injury[j],DNP[g]])
-
-        for h in range(0,2):
-            injury[h] = injury[h].split(', ')
+                
+        # Recombines injuries that got split at ','
+        # Also makes sure players with no injuries listed
+        # are not attached to another row,
+        for n in range(0,2):
+            injury[n] = injury[n].split(', ')
+            remove = []
+            for p in range(len(injury[n])):
+                if '(' not in injury[n][p] and ')' in injury[n][p]:
+                    injury[n][p-1] = ', '.join([injury[n][p-1],injury[n][p]])
+                    injury[n][p].replace(')', '==')
+                    remove.append(p)
+            injury[n] = [x for y, x in enumerate(injury[n]) if y not in remove]
 
         injury_away = injury[0]
         injury_home = injury[1]
@@ -132,26 +648,26 @@ def injury_df():
 
         for m in range(len(injury)):
             injury[m] = injury[m].replace(' = ','=').replace(' (', '=').replace(')','')
-
-        for n in range(len(injury)):
-            injury[n] = injury[n].split('=')
+            injury[m] = injury[m].split('=')
 
         for o in range(len(injury)):
-            if len(injury[o]) == 5:
+            if len(injury[o]) != 4:
                 injury[o] = injury[o][0:3]
 
+
         if i !=0:
-            temp_injury = pd.DataFrame(injury, columns=['Date', 'Team', 'Player', 'Injury'], index = None)
+            temp_injury = pd.DataFrame(injury, columns=['Date', 'Team', 'Name', 'Injury'], index = None)
             injury_data = pd.concat([temp_injury, injury_data], ignore_index = True)
         else:
-            injury_data = pd.DataFrame(injury, columns=['Date', 'Team', 'Player', 'Injury'], index = None)
+          injury_data = pd.DataFrame(injury, columns=['Date', 'Team', 'Name', 'Injury'], index = None)
+          injury_data
 
-        print(i)    
-
-    injury_data.to_csv('output/Injury_Data.csv')    
+    injury_data = injury_data.dropna()
+    injury_data = pd.concat([injury_data[injury_data['Injury'].str.contains('DNP')] , injury_data[injury_data['Injury'].str.contains('DND')]], ignore_index=True)
+    injury_data.to_csv('output/DNP.csv')    
     return injury_data
 
-def pdf_names():
+def old_pdf_names():
     """
     This fucntion pulls the matchups from the schedule2223.csv
     file and dates of those matchups to create the names of each 
@@ -177,13 +693,13 @@ def pdf_names():
 
     return file_names
 
-def pdf_download():
+def old_pdf_download():
     """
     This downloads all the box score pdfs from the NBA for the 2022-2023 Season. 
     May need to create a function to be more selective on which pdfs to get in the future.
     """
-    links2223 = pdf_links()
-    file_names = pdf_names()
+    links2223 = old_pdf_links()
+    file_names = old_pdf_names()
 
     for i in range(len(links2223)):
         direct = 'output/Box Scores/'
@@ -192,7 +708,7 @@ def pdf_download():
         with open(direct, 'wb') as f:
             f.write(response.content)
 
-def pdf_links():
+def old_pdf_links():
     """
     This function creates the links that will then be used to
     download the needed PDF files locally.
@@ -218,13 +734,8 @@ def pdf_links():
         links2223.append(link)
     
     return links2223
-#%%
-# injury_data = pd.read_csv('Injury_Data.csv', index_col = 0)
-# injury_data
 
-
-
-#%% No Longer In Use But Leaving for Reference:
+#%% This was the original way to get injury reports:
 # url = 'https://hoopshype.com/lists/nba-injuries-tracker/'
 # record = requests.get(url)
 # time.sleep(30)
