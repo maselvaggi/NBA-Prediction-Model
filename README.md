@@ -1,8 +1,6 @@
 # NBA-Prediction-Model
 Welcome to my NBA Prediction Model!
 
-This model relies on code that is able to scrape statistical data from NBA.com and ESPN.go.com.
+This model is a proof of concept.  All data acquired was web scraped/downloaded with the Advanced.py, Traditional.py, Caesars_Odds.py, injury_reports.py scripts.
 
-The necessary data is alrady scraped and cleaned in .csv format in the 'output' folder.
-
-In time, there will be a more in-depth description.
+The model was initially a simple statistical model with an accuracy rate of ~59.50%.  After utilizing machine learning models, the accuracy rate reached ~64.47% using a logistic regression.
