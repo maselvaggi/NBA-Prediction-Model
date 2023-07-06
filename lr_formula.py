@@ -98,7 +98,7 @@ def lr_test(gp_weights):
             player_metric = (player_gp*gp_weights) + (player_mpg*((1-gp_weights)/3)) + (player_ppm*((1-gp_weights)/3)) + (player_drtg*((1-gp_weights)/3))
             sie.append(player_metric)
 
-        rf['SIE'] = sie
+        rf['SIM'] = sie
         rf.to_csv(location)
 
 
@@ -322,8 +322,8 @@ def official_projections(season_stats, home, injuries_home, home_rotation, away,
     proj_pie_home = np.full(int(home_rotation),0.0)
     proj_pie_away = np.full(int(away_rotation),0.0)
 
-    pie_home = bkn["SIE"][0:int(home_rotation)].to_numpy()
-    pie_away = bos["SIE"][0:int(away_rotation)].to_numpy()    
+    pie_home = bkn["SIM"][0:int(home_rotation)].to_numpy()
+    pie_away = bos["SIM"][0:int(away_rotation)].to_numpy()    
 
     home_pie = player_impact_estimator(mpg_home, proj_pie_home, pie_home)    
     away_pie = player_impact_estimator(mpg_away, proj_pie_away, pie_away)
