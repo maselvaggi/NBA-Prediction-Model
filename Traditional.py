@@ -1,13 +1,14 @@
 #%%
 import pandas as pd
 import time
+from tqdm import tqdm
 from selenium import webdriver
 from remove_duplicates import *
-# from selenium.webdriver.common.by import By
+from selenium.webdriver.common.by import By
 # from selenium.webdriver.support.ui import WebDriverWait
 # from selenium.webdriver.support import expected_conditions as EC
 #%%
-def scrape_all_Trad():
+def scrape_all_Trad(year):
     '''
     This function will scrape all of the player box scores from the current nba regular
     season up until today's date.  Using the ChromeDriver.exe, we are able to easily
@@ -25,14 +26,20 @@ def scrape_all_Trad():
 
     If you do not click out of the popup, the script will stop and return an error.
     '''
+    if year == 2023 or year == '2023':
+        link = 'https://www.nba.com/stats/players/boxscores-traditional?Season=2022-23'
+    else:
+        link = 'https://www.nba.com/stats/players/boxscores-traditional'
+
     driver = webdriver.Chrome()
-    driver.get('https://www.nba.com/stats/players/boxscores-traditional')
+    driver.get(link)
+    driver.maximize_window()
     driver.implicitly_wait(25)
-    driver.find_element_by_xpath('/html/body/div[5]/div[3]/div/div/div/button').click()
+    #driver.find_element(By.XPATH, '/html/body/div[5]/div[3]/div/div/div/button').click()
     time.sleep(20)
 
-    drop_down = driver.find_element_by_xpath('//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[3]/div/label/div/select')
-    options = [x for x in drop_down.find_elements_by_tag_name("option")]
+    drop_down = driver.find_element(By.XPATH, '/html/body/div[1]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[3]/div/label/div/select')
+    options = [x for x in drop_down.find_elements(By.TAG_NAME, "option")]
     pages = []
     for element in options:
         pages.append(element.get_attribute("value"))
@@ -40,20 +47,20 @@ def scrape_all_Trad():
     #Code to grab all pages of data
     tables = []
 
-    for i in range(1, len(pages)):
-        text = driver.find_element_by_xpath('//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[3]/table/tbody').text
+    for i in tqdm(range(1, len(pages))):
+        text = driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[3]/table/tbody').text
         tables.append(text)
-        driver.find_element_by_xpath('//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[5]/button[2]').click()
-        time.sleep(2)
+        driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[5]/button[2]').click()
+        time.sleep(1)
         
     driver.quit()
     
-    with open("output/Traditionalfile.txt", 'w') as file:
+    with open('output/{num}/Traditionalfile{num}.txt'.format(num = year), 'w') as file:
         for row in tables:
             s = "".join(map(str, row))
             file.write(s+'\n')
             
-    trad_all = clean_all_Trad()
+    trad_all = clean_all_Trad(year)
     
     df_T = pd.DataFrame(trad_all, columns=['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 
                                            'Mins', 'Points', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%',
@@ -63,18 +70,18 @@ def scrape_all_Trad():
     df_T[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus' ]] = df_T[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']].apply(pd.to_numeric) 
     df_T[['FG%', '3P%', 'FT%']] = df_T[['FG%', '3P%', 'FT%']].astype(float)
     
-    df_T.to_csv('output/Traditional.csv')
+    df_T.to_csv('output/{num}/Traditional{num}.csv'.format(num = year))
 
 
     return df_T
     
     
-def clean_all_Trad():
+def clean_all_Trad(year):
     """
     I save the data in a txt file to have a copy, and it makes it easier to 
     view after splitting by new line.
     """
-    traditional = open('output/Traditionalfile.txt')
+    traditional = open('output/{num}/Traditionalfile{num}.txt'.format(num = year))
     traditional = traditional.read()
     T_game_logs = traditional.split("\n")
     T_game_logs.pop()
@@ -131,7 +138,7 @@ def Trad_format_rows(T_box_scores):
     return T_box_scores
 
 #%%
-def scrape_new_Trad(pages):
+def scrape_new_Trad(year, pages):
     """
     This fucntion does exactly the same as scrape_all_Trad() but you can specify
     how many pages of player box scores you want to scrape.
@@ -141,13 +148,19 @@ def scrape_new_Trad(pages):
 
     If you do not click out of the script, there will be a error and the script will stop.
     """
+
+    if year == 2023 or year == '2023':
+        link = 'https://www.nba.com/stats/players/boxscores-traditional?Season=2022-23'
+    else:
+        link = 'https://www.nba.com/stats/players/boxscores-traditional'
+
     options = webdriver.ChromeOptions()
     options.add_argument("start-maximized")
     options.add_argument("disable-infobars")
     options.add_argument("--disable-extensions")
     options.add_argument('disable-popup-blocking')
     driver = webdriver.Chrome(chrome_options=options)
-    driver.get('https://www.nba.com/stats/players/boxscores-traditional')
+    driver.get(link)
     #WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[5]/div[3]/div/div/div/button"))).click()
     # driver.implicitly_wait(50)
     # try:
@@ -175,19 +188,19 @@ def scrape_new_Trad(pages):
     tables = []
 
     for i in range(1, pages+1):
-        text = driver.find_element_by_xpath('//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[3]/table/tbody').text
+        text = driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[3]/table/tbody').text
         tables.append(text)
-        driver.find_element_by_xpath('//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[5]/button[2]').click()
+        driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[5]/button[2]').click()
         time.sleep(1)
         
     driver.quit()
     
-    with open("output/NewTraditionalfile.txt", 'w') as file:
+    with open("output/{num}/NewTraditionalfile{num}.txt".format(num = year), 'w') as file:
         for row in tables:
             s = "".join(map(str, row))
             file.write(s+'\n')
             
-    trad_new = clean_new_Trad()
+    trad_new = clean_new_Trad(year)
     
     df_T_new = pd.DataFrame(trad_new, columns=['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 
                                       'Mins', 'Points', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%',
@@ -197,20 +210,20 @@ def scrape_new_Trad(pages):
     df_T_new[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus' ]] = df_T_new[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']].apply(pd.to_numeric) 
     df_T_new[['FG%', '3P%', 'FT%']] = df_T_new[['FG%', '3P%', 'FT%']].astype(float)
     
-    traditional_old = pd.read_csv("Traditional.csv")
+    traditional_old = pd.read_csv("{num}/Traditional{num}.csv".format(num = year))
     traditional = pd.concat([df_T_new, traditional_old], ignore_index=True, sort=False)
     traditional = traditional[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'Points', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%','FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']]
     traditional = traditional.drop_duplicates().reset_index()
     #keeps old indexes as column. So I'm just overwriting it in a lazy way-- look into better way
     traditional = traditional[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'Points', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%','FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']]
     traditional = remove_duplicates(traditional)
-    traditional.to_csv('output/Traditional.csv')
+    traditional.to_csv('output/{num}/Traditional{num}.csv'.format(num = year))
     
     return traditional    
 
-def clean_new_Trad():
+def clean_new_Trad(year):
     
-    traditional = open('output/NewTraditionalfile.txt')
+    traditional = open('output/{num}/NewTraditionalfile{num}.txt'.format(num = year))
     traditional = traditional.read()
     T_game_logs = traditional.split("\n")
     T_game_logs.pop()

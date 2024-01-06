@@ -8,17 +8,17 @@ from sklearn.model_selection import train_test_split
 
 
 #%%
-def create_inputs():
+def create_inputs(year):
     '''
     This functions remakes the input .csv file for the model to be run.
     This just needs to be updated when factor model weights change.
     '''
-    schedule = pd.read_csv('output/Schedule2223.csv', index_col = 0)
-    rotations= pd.read_csv('output/Rotations.csv', index_col = 0)
-    matchups = pd.read_csv('output/Caesars_Lines.csv', index_col=0)
+    schedule = pd.read_csv('output/{num}/Schedule2223.csv'.format(num = year), index_col = 0)
+    rotations= pd.read_csv('output/{num}/Rotations.csv'.format(num = year), index_col = 0)
+    matchups = pd.read_csv('output/{num}/Caesars_Lines.csv'.format(num = year), index_col=0)
     day      = matchups[matchups['Date'] == '11/20/2022'].index
     matchups = matchups.iloc[day[0]:]
-    injuries = pd.read_csv('output/Injury_Data.csv', index_col = 0)
+    injuries = pd.read_csv('output/{num}/Injury_Data.csv'.format(num = year), index_col = 0)
 
     for i in range(len(matchups)): #len(matchups))):
         date, home, away = matchups['Date'].iloc[i], matchups['Home'].iloc[i], matchups['Away'].iloc[i]
@@ -45,21 +45,21 @@ def create_inputs():
     
 
 
-    rf_inputs.to_csv('output/RF Inputs.csv')
+    rf_inputs.to_csv('output/{num}/RF Inputs.csv'.format(num = year))
 
     return rf_inputs
 #%%
-def rf_test(gp_weights, rs):
+def rf_test(year, gp_weights, rs):
     '''
     Using a Random Forest Classifier, this function predicts outcomes of games 
     given a games played weight and a random state input (both as lists). This function was 
     not modified for efficiency, but to just get results.
     '''
-    schedule = pd.read_csv('output/Schedule2223.csv', index_col=0)
+    schedule = pd.read_csv('output/{num}/Schedule2223.csv'.format(num = year), index_col=0)
     day      = schedule[schedule['Date'] == '11/20/2022'].index
     schedule = schedule.loc[:day[-1]]
     dates = schedule['Date'].unique()
-    matchups = pd.read_csv('output/Caesars_Lines.csv', index_col=0)
+    matchups = pd.read_csv('output/{num}/Caesars_Lines.csv'.format(num = year), index_col=0)
     day      = matchups[matchups['Date'] == '11/20/2022'].index
     matchups = matchups.iloc[day[0]:]
     matchup_dates = matchups['Date'].unique()
@@ -95,7 +95,7 @@ def rf_test(gp_weights, rs):
 
     
         for a in range(len(dates)):
-            directory = 'output/Seasonal Stats/'
+            directory = 'output/{num}/Seasonal Stats/'.format(num = year)
             location = ''.join([directory, dates[a]])
             rf = pd.read_csv(location, index_col=0)
             mins = rf['Mins'].to_numpy()
@@ -167,7 +167,7 @@ def rf_test(gp_weights, rs):
             else:
                 final_inputs = partial_inputs
 
-        final_inputs.to_csv('output/RF Final Inputs.csv')
+        final_inputs.to_csv('output/{num}/RF Final Inputs.csv'.format(num = year))
 
         X = final_inputs.drop(['Date', 'Home', 'Away', 'Actual Result', 'CS Result'], axis = 1)
         y = final_inputs['Actual Result']
@@ -217,7 +217,7 @@ def rf_test(gp_weights, rs):
             if a != 0:
                 #My device is old and kept crashing so checkpoints were added.
                 weight_outputs = pd.concat([weight_outputs, outputs])
-                directory = 'output/RF Test Results/'
+                directory = 'output/{num}/RF Test Results/'.format(num = year)
                 name_1 = ''.join(['GP', str(gp_weights[i])])
                 name_2 = ''.join(['RS', str(rs[a])])
                 name_2 = ''.join([name_2, '.csv'])
@@ -227,7 +227,7 @@ def rf_test(gp_weights, rs):
                 weight_outputs.to_csv(location)
             else:
                 weight_outputs = outputs
-                directory = 'output/RF Test Results/'
+                directory = 'output/{num}/RF Test Results/'.format(num = year)
                 name_1 = ''.join(['GP', str(gp_weights[i])])
                 name_2 = ''.join(['RS', str(rs[a])])
                 name_2 = ''.join([name_2, '.csv'])
@@ -236,7 +236,7 @@ def rf_test(gp_weights, rs):
                 location = ''.join([directory, name])
                 weight_outputs.to_csv(location)
 
-        directory = 'output/RF Test Results/'
+        directory = 'output/{num}/RF Test Results/'.format(num = year)
         name = ''.join(['GP', str(gp_weights[i]), '.csv'])
         location = ''.join([directory, name])
         weight_outputs.to_csv(location)
@@ -385,11 +385,11 @@ def official_projections(season_stats, home, injuries_home, home_rotation, away,
     return home_pts, drtg_bkn, home_pie, away_pts, drtg_bos, away_pie
     
 
-def matchup(home, away, date, schedule, rotations, injuries):
+def matchup(year, home, away, date, schedule, rotations, injuries):
 
     cleaned_date = date.replace('/', '_')
     cleaned_date = ''.join([cleaned_date,'.csv'])
-    directory = 'output/Seasonal Stats/'
+    directory = 'output/{num}/Seasonal Stats/'.format(num = year)
     location = ''.join([directory, cleaned_date])
     season_stats = pd.read_csv(location, index_col=0)
 

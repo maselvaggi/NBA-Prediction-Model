@@ -193,13 +193,13 @@ def official_projections(season_stats, home, injuries_home, home_rotation, away,
     return HMPTS, AWPTS
     
 
-def matchup(home, away, date, schedule, rotations, injuries):
+def matchup(year, home, away, date, schedule, rotations, injuries):
     proj_away = np.full(1500,1.0)
     proj_home = np.full(1500,1.0)
 
     cleaned_date = date.replace('/', '_')
     cleaned_date = ''.join([cleaned_date,'.csv'])
-    directory = 'output/Seasonal Stats/'
+    directory = 'output/{num}/Seasonal Stats/'.format(num = year)
     location = ''.join([directory, cleaned_date])
     season_stats = pd.read_csv(location, index_col=0)
 
@@ -212,7 +212,7 @@ def matchup(home, away, date, schedule, rotations, injuries):
     index_date = '/'.join([index_date[0], index_date[1], index_date[2]])
 
 
-    directory = 'output/Active Rosters/'
+    directory = 'output/{num}/Active Rosters/'.format(num = year)
     location = ''.join([directory, file_date, '.csv'])
     active = pd.read_csv(location, index_col=0)
 

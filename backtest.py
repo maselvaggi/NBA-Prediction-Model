@@ -6,16 +6,16 @@ from tqdm import tqdm
 
 
 # %%
-def backtest():
-    schedule = pd.read_csv('output/Schedule2223.csv', index_col = 0)
-    rotations= pd.read_csv('output/Rotations.csv', index_col = 0)
-    matchups = pd.read_csv('output/Caesars_Lines.csv', index_col=0)
+def backtest(year):
+    schedule = pd.read_csv('output/{num}/Schedule{num}}.csv'.format(num = year), index_col = 0)
+    rotations= pd.read_csv('output/{num}/Rotations{num}.csv'.format(num = year), index_col = 0)
+    matchups = pd.read_csv('output/{num}/Caesars_Lines{num}.csv'.format(num = year), index_col=0)
     day      = matchups[matchups['Date'] == '11/20/2022'].index
     matchups = matchups.iloc[day[0]:]
-    injuries = pd.read_csv('output/Injury_Data.csv', index_col = 0)
-    directory = 'output/Model Predictions '
+    injuries = pd.read_csv('output/{num}/Injury_Data{num}.csv'.format(num = year), index_col = 0)
+    directory = 'output/{num}/Model Predictions'.format(num = year)
 
-    for i in tqdm(range(201, len(matchups))): #len(matchups))):
+    for i in tqdm(range(len(matchups))): #len(matchups))):
         caesars_favorite, caesars_spread = matchups['Favorite'].iloc[i], matchups['Spread'].iloc[i]
         date, home, away = matchups['Date'].iloc[i], matchups['Home'].iloc[i], matchups['Away'].iloc[i]
         
@@ -80,7 +80,7 @@ def backtest():
             final_lines.to_csv(location)
 
 
-    final_lines.to_csv('output/Model Predictions.csv')
+    final_lines.to_csv('output/{num}/Model Predictions{num}.csv'.format(num = year))
     return final_lines
 #%%
 formula_predictions = backtest()

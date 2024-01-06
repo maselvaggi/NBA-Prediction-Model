@@ -2,7 +2,7 @@
 import pandas as pd
 
 #%%
-def get_team_rotations():
+def get_team_rotations(year):
     """
     Here we are creating the average rotation size per team, per game.
 
@@ -22,7 +22,7 @@ def get_team_rotations():
     Last, we round off the rotation size and save that as a .csv file 
     to be used as an input when running the model.  
     """
-    box_scores = pd.read_csv('output/Advanced.csv', index_col=0)
+    box_scores = pd.read_csv('output/{num}/Advanced{num}.csv'.format(num = year), index_col=0)
     box_scores['Date'] = pd.to_datetime(box_scores['Date'], format = '%m/%d/%Y')
     box_scores = box_scores.sort_values(by = ['Date'], ascending = True)
     teams = box_scores['Team'].unique()
@@ -50,7 +50,7 @@ def get_team_rotations():
         sma_team = rotations[i].rolling(10).mean().to_numpy() 
         sma.append(sma_team)
         
-        #get cumulative moving average to replace nans in forst 10 rows of sma
+        #get cumulative moving average to replace nans in first 10 rows of sma
         cma_team = rotations[i].expanding().mean().to_numpy()
         cma.append(cma_team)
 
@@ -66,11 +66,11 @@ def get_team_rotations():
     rotations = pd.concat([ten_games, sma])
 
     model_rotations = round(rotations)
-    model_rotations.to_csv('output/Rotations.csv')
+    model_rotations.to_csv('output/{num}/Rotations{num}.csv'.format(num = year))
 
     return model_rotations
 # %%
-rotations = get_team_rotations()
+rotations = get_team_rotations('2023')
 
 #%%
 if __name__ == "__main__":

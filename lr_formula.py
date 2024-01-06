@@ -16,18 +16,18 @@ from sklearn.metrics import accuracy_score
 
 
 #%%
-def lr_test(gp_weights):
+def lr_test(year, gp_weights):
     '''
     Using the same inputs as the RF model, we just use a Logistic Regression to
     predict the outcomes of games.  
 
     This model goes through 100 random states to ensure diverse sampling.
     '''
-    schedule = pd.read_csv('output/Schedule2223.csv', index_col=0)
+    schedule = pd.read_csv('output/{num}/Schedule2223.csv'.format(num = year), index_col=0)
     day      = schedule[schedule['Date'] == '11/20/2022'].index
     schedule = schedule.loc[:day[-1]]
     dates = schedule['Date'].unique()
-    matchups = pd.read_csv('output/Caesars_Lines.csv', index_col=0)
+    matchups = pd.read_csv('output/{num}/Caesars_Lines.csv'.format(num = year), index_col=0)
     day      = matchups[matchups['Date'] == '11/20/2022'].index
     matchups = matchups.iloc[day[0]:]
     matchup_dates = matchups['Date'].unique()
@@ -59,7 +59,7 @@ def lr_test(gp_weights):
         dates[i] = date
 
     for a in range(len(dates)):
-        directory = 'output/Seasonal Stats/'
+        directory = 'output/{num}/Seasonal Stats/'.format(num = year)
         location = ''.join([directory, dates[a]])
         rf = pd.read_csv(location, index_col=0)
         mins = rf['Mins'].to_numpy()
@@ -134,7 +134,7 @@ def lr_test(gp_weights):
         else:
             final_inputs = partial_inputs
 
-    final_inputs.to_csv('output/LR Final Inputs.csv')
+    final_inputs.to_csv('output/{num}/LR Final Inputs.csv'.format(num = year))
 
     X = final_inputs.drop(['Date', 'Home', 'Away', 'Home Points', 'Away Points', 'Actual Result', 'CS Result'], axis = 1)
     y = final_inputs['Actual Result']
@@ -183,7 +183,7 @@ def lr_test(gp_weights):
     results = pd.DataFrame(data = [accuracy, cs_accuracy]).T
 
     results.columns = ['Model', 'CS']
-    results.to_csv('output/LR Test Results/Accuracy.csv')
+    results.to_csv('output/{num}/LR Test Results/Accuracy.csv'.format(num = year))
 
     return results
 
@@ -331,11 +331,11 @@ def official_projections(season_stats, home, injuries_home, home_rotation, away,
     return home_pts, drtg_bkn, home_pie, away_pts, drtg_bos, away_pie
     
 
-def matchup(home, away, date, schedule, rotations, injuries):
+def matchup(year, home, away, date, schedule, rotations, injuries):
 
     cleaned_date = date.replace('/', '_')
     cleaned_date = ''.join([cleaned_date,'.csv'])
-    directory = 'output/Seasonal Stats/'
+    directory = 'output/{num}/Seasonal Stats/'.format(num = year)
     location = ''.join([directory, cleaned_date])
     season_stats = pd.read_csv(location, index_col=0)
 

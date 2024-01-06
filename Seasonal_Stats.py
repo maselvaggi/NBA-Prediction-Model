@@ -4,7 +4,7 @@ import numpy as np
 from tqdm import tqdm
 
 # %%
-def seasonal_stats():
+def seasonal_stats(year):
     '''
     This functions creates the season stats for each playey in the form of a 
     dataframe and also creates a .csv file in your directory.  The function combines
@@ -18,8 +18,8 @@ def seasonal_stats():
     San Antonio Spurs, but his stats are listed under Toronto. He was traded while injured in Toronto
     and did not appear in any games while a member of SAS. This will be cleaned up eventually.
     '''
-    traditional = pd.read_csv('output/Traditional.csv', index_col = 0)
-    advanced = pd.read_csv('output/Advanced.csv', index_col = 0)
+    traditional = pd.read_csv('output/{num}/Traditional{num}.csv'.format(num = year), index_col = 0)
+    advanced = pd.read_csv('output/{num}/Advanced{num}.csv'.format(num = year), index_col = 0)
     players = traditional['Name'].unique()
     
     for i in range(len(players)):
@@ -35,7 +35,7 @@ def seasonal_stats():
 
         season.append(guy['Name'].iloc[0])
         season.append(guy['Team'].iloc[0])
-        season.append('2022-2023')
+        season.append(year)
         season.append(GP)
         season.append((len(guy[guy['Result']=='W'])/GP)*100) #Win %
         season.append((guy['Mins'].sum()/GP))
@@ -93,14 +93,14 @@ def seasonal_stats():
             season_stats = season_stats.T
             season_stats.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'TOV', 'AST/TO', 'STL', 'BLK', 'EFG%', 'TS%', 'OFFRTG', 'DEFRTG', 'NETRTG', 'PF', 'Plusminus', 'PIE']
 
-    season_stats.to_csv('output/Season_Stats.csv')    
+    season_stats.to_csv('output/{num}/Season_Stats{num}.csv'.format(num = year))    
     return season_stats
 
 #%%
-def partial_seasonal_stats():
+def partial_seasonal_stats(year):
     
-    traditional = pd.read_csv('output/Traditional.csv', index_col = 0)
-    advanced    = pd.read_csv('output/Advanced.csv', index_col = 0)
+    traditional = pd.read_csv('output/{num}/Traditional{num}.csv'.format(num = year), index_col = 0)
+    advanced    = pd.read_csv('output/{num}/Advanced{num}.csv'.format(num = year), index_col = 0)
     dates = traditional['Date'].unique()
     # Use first 20% of games to normalize stats
     dates = dates[0:132] 
@@ -118,7 +118,7 @@ def partial_seasonal_stats():
 
     return True
     
-def daily_seasonal_stats(advanced, traditional, date):
+def daily_seasonal_stats(advanced, traditional, date, year):
     players = traditional['Name'].unique()
     
     for i in range(len(players)):
@@ -134,7 +134,7 @@ def daily_seasonal_stats(advanced, traditional, date):
 
         season.append(guy['Name'].iloc[0])
         season.append(guy['Team'].iloc[0])
-        season.append('2022-2023')
+        season.append(year)
         season.append(GP)
         season.append((len(guy[guy['Result']=='W'])/GP)*100) #Win %
         season.append((guy['Mins'].sum()/GP))
@@ -197,10 +197,7 @@ def daily_seasonal_stats(advanced, traditional, date):
         date[0] = date[0].replace('0', '')
     if date[1][0] == '0':
         date[1] = date[1].replace('0', '')
-    date = '_'.join([date[0], date[1], date[2]])
-    date = ''.join([date, '.csv'])
-    directory = 'output/Seasonal Stats'
-    location = '/'.join([directory, date])
+    location = 'output/{num}/Seasonal Stats/{zero}_{one}_{two}.csv'.format(num = year, zero = date[0], one = date[1], two = date[2])    
     season_stats.to_csv(location)
 
     return True
