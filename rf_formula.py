@@ -2,6 +2,7 @@
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+from formula import *
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -13,9 +14,9 @@ def create_inputs(year):
     This functions remakes the input .csv file for the model to be run.
     This just needs to be updated when factor model weights change.
     '''
-    schedule = pd.read_csv('output/{num}/Schedule2223.csv'.format(num = year), index_col = 0)
-    rotations= pd.read_csv('output/{num}/Rotations.csv'.format(num = year), index_col = 0)
-    matchups = pd.read_csv('output/{num}/Caesars_Lines.csv'.format(num = year), index_col=0)
+    schedule = pd.read_csv('output/{num}/Schedule{num}.csv'.format(num = year), index_col = 0)
+    rotations= pd.read_csv('output/{num}/Rotations{num}.csv'.format(num = year), index_col = 0)
+    matchups = pd.read_csv('output/{num}/Caesars_Lines{num}.csv'.format(num = year), index_col=0)
     day      = matchups[matchups['Date'] == '11/20/2022'].index
     matchups = matchups.iloc[day[0]:]
     injuries = pd.read_csv('output/{num}/Injury_Data.csv'.format(num = year), index_col = 0)
@@ -55,11 +56,11 @@ def rf_test(year, gp_weights, rs):
     given a games played weight and a random state input (both as lists). This function was 
     not modified for efficiency, but to just get results.
     '''
-    schedule = pd.read_csv('output/{num}/Schedule2223.csv'.format(num = year), index_col=0)
+    schedule = pd.read_csv('output/{num}/Schedule{num}.csv'.format(num = year), index_col=0)
     day      = schedule[schedule['Date'] == '11/20/2022'].index
     schedule = schedule.loc[:day[-1]]
     dates = schedule['Date'].unique()
-    matchups = pd.read_csv('output/{num}/Caesars_Lines.csv'.format(num = year), index_col=0)
+    matchups = pd.read_csv('output/{num}/Caesars_Lines{num}.csv'.format(num = year), index_col=0)
     day      = matchups[matchups['Date'] == '11/20/2022'].index
     matchups = matchups.iloc[day[0]:]
     matchup_dates = matchups['Date'].unique()
@@ -120,7 +121,7 @@ def rf_test(year, gp_weights, rs):
             avg_mpg = sum_mins/len(total_mins)
             avg_mpg = avg_mpg/avg_gp
 
-            sie = []
+            sim = []
 
             for b in range(len(mins)):
                 player_gp   = gp[b]/avg_gp
@@ -132,9 +133,9 @@ def rf_test(year, gp_weights, rs):
                     player_drtg = avg_drtg/drtg[b]
                 #There are 4 factors in this model, make sure they add up to 1
                 player_metric = (player_gp*gp_weights[i]) + (player_mpg*((1-gp_weights[i])/3)) + (player_ppm*((1-gp_weights[i])/3)) + (player_drtg*((1-gp_weights[i])/3))
-                sie.append(player_metric)
+                sim.append(player_metric)
 
-            rf['SIE'] = sie
+            rf['SIM'] = sim
             rf.to_csv(location)
         
 
@@ -250,6 +251,10 @@ Team As PPG and Team Bs DRTG are compared to create Team As final projected poin
 Same goes for Team B.
 '''
 def Minutes(mpg, inj, rotation_size):
+    """
+    This function will return projected minutes for each player who is projected
+    to play given injuries and the team's rotation size.  
+    """
     add_mins = sum(mpg[-(len(mpg)-int(rotation_size)):]) + sum(inj) #sum mins from players not in rotation_size
     
     #First Adjustment
@@ -272,7 +277,7 @@ def Minutes(mpg, inj, rotation_size):
     
     return mpg
 
-def player_impact_estimator(mpg, proj_pie, pie):
+def selvaggi_impact_estimator(mpg, proj_pie, pie):
     for i in range(len(proj_pie)):
         proj_pie[i] = (mpg[i]*pie[i])
     
@@ -292,19 +297,19 @@ def points_away(proj_pts_away, mpg_away, ppm_away):
     return sum(proj_pts_away) - 1.5   
 
 
-def drtg_home(drtg_bkn, mpg_home, bkn_drtg, rotation_size_home):
+def drtg_home(home_team_drtg, mpg_home, home_player_drtg, home_rotation):
     
-    for i in range(int(rotation_size_home)):
-        drtg_bkn[i] = (mpg_home[i]/240)*bkn_drtg[i]
+    for i in range(int(home_rotation)):
+        home_team_drtg[i] = (mpg_home[i]/240)*home_player_drtg[i]
     
-    return sum(drtg_bkn)
+    return sum(home_team_drtg)
     
     
-def drtg_away(drtg_bos, mpg_away, bos_drtg, rotation_size_away): 
-    for i in range(int(rotation_size_away)):
-        drtg_bos[i] = (mpg_away[i]/240)*bos_drtg[i]
+def drtg_away(away_team_drtg, mpg_away, away_player_drtg, away_rotation):
+    for i in range(int(away_rotation)):
+        away_team_drtg[i] = (mpg_away[i]/240)*away_player_drtg[i]
     
-    return sum(drtg_bos)
+    return sum(away_team_drtg)
 
 
 def def_rtg_mean(season_stats):
@@ -321,51 +326,51 @@ def def_rtg_mean(season_stats):
 def official_projections(season_stats, home, injuries_home, home_rotation, away, injuries_away, away_rotation):
     drtg_mean = def_rtg_mean(season_stats)
 
-    bkn = season_stats.loc[season_stats['Team'] == home]
-    bkn = bkn.sort_values(by='Mins', ascending=False)
+    home_stats = season_stats.loc[season_stats['Team'] == home]
+    home_stats = home_stats.sort_values(by='Mins', ascending=False)
     if injuries_home != []:
-        bkn_temp = bkn[~bkn['Name'].isin(injuries_home)] #returns all rows not including those in injury report
-        bkn_inj  = bkn[bkn['Name'].isin(injuries_home)]
-        mpg_inj_home = bkn_inj['Mins'].to_numpy()
+        home_stats_temp = home_stats[~home_stats['Name'].isin(injuries_home)] #returns all rows not including those in injury report
+        home_inj  = home_stats[home_stats['Name'].isin(injuries_home)]
+        mpg_inj_home = home_inj['Mins'].to_numpy()
         
-        if int(home_rotation) > len(bkn_temp['Name']):
-            home_rotation = len(bkn_temp['Name'])
+        if int(home_rotation) > len(home_stats_temp['Name']):
+            home_rotation = len(home_stats_temp['Name'])
     else:
         mpg_inj_home = [0]
 
-    bkn["DEFRTG"] = bkn["DEFRTG"].fillna(drtg_mean)
-    bkn_drtg = bkn["DEFRTG"][0:int(home_rotation)].to_numpy()    
+    home_stats["DEFRTG"] = home_stats["DEFRTG"].fillna(drtg_mean)
+    home_player_drtg = home_stats["DEFRTG"][0:int(home_rotation)].to_numpy()    
     
-    bos = season_stats.loc[season_stats['Team'] == away]
-    bos = bos.sort_values(by='Mins', ascending=False)
+    away_stats = season_stats.loc[season_stats['Team'] == away]
+    away_stats = away_stats.sort_values(by='Mins', ascending=False)
     if injuries_away != []:
-        bos_temp = bos[~bos['Name'].isin(injuries_away)] #returns all rows not including those in injury report
-        bos_inj  = bos[bos['Name'].isin(injuries_away)]
-        mpg_inj_away = bos_inj['Mins'].to_numpy()
+        away_stats_temp = away_stats[~away_stats['Name'].isin(injuries_away)] #returns all rows not including those in injury report
+        away_inj  = away_stats[away_stats['Name'].isin(injuries_away)]
+        mpg_inj_away = away_inj['Mins'].to_numpy()
 
         
-        if int(away_rotation) > len(bos_temp['Name']):
-            away_rotation = len(bos_temp['Name'])
+        if int(away_rotation) > len(away_stats_temp['Name']):
+            away_rotation = len(away_stats_temp['Name'])
     else:
         mpg_inj_away = [0]
 
 
-    bos["DEFRTG"] = bos["DEFRTG"].fillna(drtg_mean)
-    bos_drtg = bos["DEFRTG"][0:int(away_rotation)].to_numpy()    
+    away_stats["DEFRTG"] = away_stats["DEFRTG"].fillna(drtg_mean)
+    away_player_drtg = away_stats["DEFRTG"][0:int(away_rotation)].to_numpy()    
         
-    mpg_home = bkn['Mins'].to_numpy()
-    mpg_away = bos['Mins'].to_numpy()
+    mpg_home = home_stats['Mins'].to_numpy()
+    mpg_away = away_stats['Mins'].to_numpy()
     
     mpg_home = Minutes(mpg_home, mpg_inj_home, home_rotation)
     mpg_away = Minutes(mpg_away, mpg_inj_away, away_rotation)
     
-    drtg_bkn = np.full(int(home_rotation),0.0)
-    drtg_bkn = drtg_home(drtg_bkn, mpg_home, bkn_drtg, home_rotation)
-    drtg_bos = np.full(int(away_rotation),0.0)
-    drtg_bos = drtg_away(drtg_bos, mpg_away, bos_drtg, away_rotation)
+    home_team_drtg = np.full(int(home_rotation),0.0)
+    home_team_drtg = drtg_home(home_team_drtg, mpg_home, home_player_drtg, home_rotation)
+    away_team_drtg = np.full(int(away_rotation),0.0)
+    away_team_drtg = drtg_away(away_team_drtg, mpg_away, away_player_drtg, away_rotation)
 
-    ppm_home = bkn["PPM"][0:int(home_rotation)].to_numpy()
-    ppm_away = bos["PPM"][0:int(away_rotation)].to_numpy()    
+    ppm_home = home_stats["PPM"][0:int(home_rotation)].to_numpy()
+    ppm_away = away_stats["PPM"][0:int(away_rotation)].to_numpy()    
     
     proj_pts_home = np.full(int(home_rotation),0.0)
     proj_pts_away = np.full(int(away_rotation),0.0)
@@ -376,13 +381,13 @@ def official_projections(season_stats, home, injuries_home, home_rotation, away,
     proj_pie_home = np.full(int(home_rotation),0.0)
     proj_pie_away = np.full(int(away_rotation),0.0)
 
-    pie_home = bkn["SIE"][0:int(home_rotation)].to_numpy()
-    pie_away = bos["SIE"][0:int(away_rotation)].to_numpy()    
+    pie_home = home_stats["SIM"][0:int(home_rotation)].to_numpy()
+    pie_away = away_stats["SIM"][0:int(away_rotation)].to_numpy()    
 
-    home_pie = player_impact_estimator(mpg_home, proj_pie_home, pie_home)    
-    away_pie = player_impact_estimator(mpg_away, proj_pie_away, pie_away)
+    home_pie = selvaggi_impact_estimator(mpg_home, proj_pie_home, pie_home)    
+    away_pie = selvaggi_impact_estimator(mpg_away, proj_pie_away, pie_away)
 
-    return home_pts, drtg_bkn, home_pie, away_pts, drtg_bos, away_pie
+    return home_pts, home_team_drtg, home_pie, away_pts, away_team_drtg, away_pie
     
 
 def matchup(year, home, away, date, schedule, rotations, injuries):

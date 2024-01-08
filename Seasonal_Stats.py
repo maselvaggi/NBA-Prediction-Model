@@ -203,67 +203,6 @@ def daily_seasonal_stats(advanced, traditional, date, year):
     return True
 
 #%%
-partial_seasonal_stats()
-
-#%%
-traditional = pd.read_csv('output/Traditional.csv', index_col = 0)
-dates = traditional['Date'].unique()
-
-dates[0][0]
-
-#%%
-#def correct_player_team(date, season_stats, teams, injuries):
-date = '11/20/2022'
-injuries  = pd.read_csv('output/Injury_Data.csv', index_col = 0)
-
-traditional = pd.read_csv('output/Traditional.csv', index_col = 0)
-traditional  = traditional[traditional['Date'] == date]
-teams = traditional['Team'].unique()
-injuries = injuries[injuries['Date'] == date]
-for i in teams:
-    temp_t = traditional[traditional['Team'] == i]
-    temp_i = injuries[injuries['Team'] == i]
-    played = list(temp_t['Name'].unique())
-    out    = list(temp_i['Player'] .unique())
-    roster = played + out
-    
-    print(roster)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # for i in range(len(injuries)):
-    #     team = injuries['Team'].iloc[i]
-    #     player = injuries['Name'].iloc[i]
-
-    #     roster = season_stats[season_stats['Team'] == team]
-        
-    #     if roster['Name'].str.contains(player).any() == True:
-    #         pass
-    #     else:   
-    #         for j in teams:
-    #             roster = season_stats[season_stats['Team'] == j]
-    #             if roster['Name'].str.contains(player).any() == True:
-    #                 season_stats = season_stats[~season_stats['Team'].str.contains(j)]
-    #                 temp = roster[roster['Name'].str.contains(player)]
-
-
-
-
-    
-    
-
-#%%
 if __name__ == "__main__":
     seasonal_stats()
     partial_seasonal_stats()

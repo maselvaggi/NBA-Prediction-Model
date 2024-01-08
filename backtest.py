@@ -86,7 +86,7 @@ def backtest(year):
 formula_predictions = backtest()
 
 #%%
-results = pd.read_csv('output/Model Predictions.csv', index_col=0)
+results = pd.read_csv('output/{num}/Model Predictions{num}.csv'.format(num = year), index_col=0)
 results
 
 correct = 0
