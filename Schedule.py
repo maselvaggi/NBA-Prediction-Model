@@ -19,8 +19,8 @@ def create_schedule(year):
     schedule = schedule[schedule['Location'] == "H"]
     schedule = schedule.reset_index(drop=True)
     
-    schedule.to_csv('output/Schedule{num}.csv'.format(num = year))
-    schedule = pd.read_csv('output/Schedule{num}.csv'.format(num = year), index_col=0)
+    schedule.to_csv('output/{num}/Schedule{num}.csv'.format(num = year))
+    schedule = pd.read_csv('output/{num}/Schedule{num}.csv'.format(num = year), index_col=0)
     
     return schedule
 
