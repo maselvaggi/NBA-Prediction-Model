@@ -98,6 +98,9 @@ def get_2024_game_ids(link, headers):
         time.sleep(0.5) 
 
     game_ids = pd.DataFrame(game_ids, columns = ['Date', "Game ID"])
+    with open('output/2024/GameIDs2024.txt', 'a') as f:
+        game_ids_string = game_ids['Game ID'].to_string(header = False, index = False)
+        f.write(game_ids_string)
     game_ids.to_csv('output/2024/GameIDs2024.csv')
 
     # with open('output/2024/GameIDs2024.txt', 'w') as file:
@@ -106,21 +109,6 @@ def get_2024_game_ids(link, headers):
 
     return game_ids  
 
-
-#%%
-game_ids = get_game_ids('2024')
-
-#%%
-game_ids.to_csv('output/2024/GameIDs2024.csv')
-#%%
-session = requests.Session()
-session.headers
-#%%
-headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.111 Safari/537.36'}
-record = requests.get('https://www.espn.com/nba/game/_/gameId/401468020', headers = headers)
-record.status_code
-
-# %%
 def get_game_info(year):
     '''
     This function uses the saved game_ids to get the: line, spread, date, 
@@ -211,11 +199,7 @@ def get_game_info(year):
     game_lines = game_lines.replace('WSH', 'WAS').replace('SA','SAS').replace('SA<','SAS').replace('NY','NYK').replace('NY<','NYK').replace('NO','NOP').replace('NO<','NOP').replace('GS','GSW').replace('GS<','GSW').replace('UTAH','UTA')
     game_lines.to_csv('output/{num}/Caesars_Lines{num}.csv'.format(num = year))  
 
-    return game_lines
-#%%
-game_info = get_game_info('2023')
-game_info
-
+    return game_liness
 
 #%%
 if __name__ == "__main__":
