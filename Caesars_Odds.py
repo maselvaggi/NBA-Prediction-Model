@@ -132,7 +132,7 @@ def get_game_info(year):
         game_ids = game_ids.read()
         game_ids = game_ids.split('\n')
 
-    for i in tqdm(range(0, len(game_ids))):
+    for i in tqdm(range(0, 471)): #len(game_ids)
         page = requests.get('https://www.espn.com/nba/game/_/gameId/{ID}'.format(ID = game_ids[i]), headers = headers)
         soup = BeautifulSoup(page.content, "lxml")
         
@@ -199,7 +199,7 @@ def get_game_info(year):
     game_lines = game_lines.replace('WSH', 'WAS').replace('SA','SAS').replace('SA<','SAS').replace('NY','NYK').replace('NY<','NYK').replace('NO','NOP').replace('NO<','NOP').replace('GS','GSW').replace('GS<','GSW').replace('UTAH','UTA')
     game_lines.to_csv('output/{num}/Caesars_Lines{num}.csv'.format(num = year))  
 
-    return game_liness
+    return game_lines
 
 #%%
 if __name__ == "__main__":

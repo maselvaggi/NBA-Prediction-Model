@@ -1,6 +1,5 @@
 #%%
 import pandas as pd
-import csv
 #%%
 def create_schedule(year):
     """
@@ -24,6 +23,6 @@ def create_schedule(year):
     
     return schedule
 
-# %%
+#%%
 if __name__ == "__main__":
     create_schedule()
