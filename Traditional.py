@@ -137,7 +137,6 @@ def Trad_format_rows(T_box_scores):
     
     return T_box_scores
 
-#%%
 def scrape_new_Trad(year, pages):
     """
     This fucntion does exactly the same as scrape_all_Trad() but you can specify
@@ -154,13 +153,10 @@ def scrape_new_Trad(year, pages):
     else:
         link = 'https://www.nba.com/stats/players/boxscores-traditional'
 
-    options = webdriver.ChromeOptions()
-    options.add_argument("start-maximized")
-    options.add_argument("disable-infobars")
-    options.add_argument("--disable-extensions")
-    options.add_argument('disable-popup-blocking')
-    driver = webdriver.Chrome(chrome_options=options)
+    driver = webdriver.Chrome()
     driver.get(link)
+    driver.maximize_window()
+
     #WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[5]/div[3]/div/div/div/button"))).click()
     # driver.implicitly_wait(50)
     # try:
@@ -183,11 +179,20 @@ def scrape_new_Trad(year, pages):
     #                 driver.find_element_by_xpath('/html/body/div[4]/div[3]/div/div/div/button').click()
     #             except Exception:
     #                 pass
-    time.sleep(20)
+    time.sleep(30)        
 
+    drop_down = driver.find_element(By.XPATH, '/html/body/div[1]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[3]/div/label/div/select')
+    options = [x for x in drop_down.find_elements(By.TAG_NAME, "option")]
+    table_pages = []
+    for element in options:
+        table_pages.append(element.get_attribute("value"))
+
+    if pages > len(table_pages):
+        raise ValueError("The number of pages you entred: {num1} is greater than the number of pages available: {num2}.".format(num1 = pages, num2 = len(table_pages)))    
+ 
     tables = []
 
-    for i in range(1, pages+1):
+    for i in tqdm(range(1, pages+1)):
         text = driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[3]/table/tbody').text
         tables.append(text)
         driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[5]/button[2]').click()
@@ -210,7 +215,7 @@ def scrape_new_Trad(year, pages):
     df_T_new[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus' ]] = df_T_new[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']].apply(pd.to_numeric) 
     df_T_new[['FG%', '3P%', 'FT%']] = df_T_new[['FG%', '3P%', 'FT%']].astype(float)
     
-    traditional_old = pd.read_csv("{num}/Traditional{num}.csv".format(num = year))
+    traditional_old = pd.read_csv("output/{num}/Traditional{num}.csv".format(num = year))
     traditional = pd.concat([df_T_new, traditional_old], ignore_index=True, sort=False)
     traditional = traditional[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'Points', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%','FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']]
     traditional = traditional.drop_duplicates().reset_index()

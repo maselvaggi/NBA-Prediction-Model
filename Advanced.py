@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 # from selenium.webdriver.support.ui import WebDriverWait
 # from selenium.webdriver.support import expected_conditions as EC
 # import requests
-# %%
+
 def scrape_all_ADV(year):
     '''
     This function will scrape all of the advavnced player box scores from the current nba regular
@@ -129,9 +129,6 @@ def Adv_format_rows(A_box_scores):
         
     return A_box_scores
 
-#%%
-df_2024 = scrape_all_ADV(2024)
-#%%
 def scrape_new_ADV(year, pages):
     """
     This function scrapes a specified number of pages of advanced stats from NBA.com.
@@ -155,6 +152,14 @@ def scrape_new_ADV(year, pages):
     #         pass
 
     time.sleep(30)        
+    drop_down = driver.find_element(By.XPATH, '/html/body/div[1]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[3]/div/label/div/select')
+    options = [x for x in drop_down.find_elements(By.TAG_NAME, "option")]
+    table_pages = []
+    for element in options:
+        table_pages.append(element.get_attribute("value"))
+
+    if pages > len(table_pages):
+        raise ValueError("The number of pages you entred: {num1} is greater than the number of pages available: {num2}.".format(num1 = pages, num2 = len(table_pages)))    
     
     A_tables = []
     for i in tqdm(range(1, pages+1)):
@@ -229,8 +234,7 @@ def remove_duplicates(data):
     for i in duplicates:
         data = data.drop(index = i[0])    
     return data
-#%%
-new_data = scrape_new_ADV(2024, 50)
+
 #%%
 if __name__ == "__main__":
     scrape_all_ADV()

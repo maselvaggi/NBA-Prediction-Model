@@ -4,10 +4,6 @@ import pandas as pd
 import time
 from tqdm import tqdm
 from bs4 import BeautifulSoup
-#%%
-link = 'https://www.espn.com/nba/game/_/gameId/'
-first_game = 401468016 #game ID of first game of 2022-2023 regular season
-last_game  = 401469385 #game ID of last  game of 2022-2023 regular season
 
 #%% Get all game IDs for 2022-2023 regular season
 #   Create .txt to save game IDs so no need to rerun    

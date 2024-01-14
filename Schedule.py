@@ -1,6 +1,6 @@
 #%%
 import pandas as pd
-#%%
+
 def create_schedule(year):
     """
     This function is able to create the entire NBA season schedule using the 
