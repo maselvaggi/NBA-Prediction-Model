@@ -37,6 +37,8 @@ def scrape_all_Trad(year):
     driver.implicitly_wait(25)
     #driver.find_element(By.XPATH, '/html/body/div[5]/div[3]/div/div/div/button').click()
     time.sleep(20)
+    driver.find_element(By.XPATH, '/html/body/div[3]/div[2]/div/div[2]/button').click()
+    time.sleep(20)
 
     drop_down = driver.find_element(By.XPATH, '/html/body/div[1]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[3]/div/label/div/select')
     options = [x for x in drop_down.find_elements(By.TAG_NAME, "option")]
@@ -179,8 +181,10 @@ def scrape_new_Trad(year, pages):
     #                 driver.find_element_by_xpath('/html/body/div[4]/div[3]/div/div/div/button').click()
     #             except Exception:
     #                 pass
-    time.sleep(30)        
-
+    time.sleep(20)        
+    driver.find_element(By.XPATH, '/html/body/div[3]/div[2]/div/div[2]/button').click()
+    time.sleep(20)
+    
     drop_down = driver.find_element(By.XPATH, '/html/body/div[1]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[3]/div/label/div/select')
     options = [x for x in drop_down.find_elements(By.TAG_NAME, "option")]
     table_pages = []

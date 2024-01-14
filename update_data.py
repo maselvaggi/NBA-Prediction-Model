@@ -76,8 +76,10 @@ def update_traditional_stats(trad_year, trad_pages, all_trad_pages):
                 new_traditional_stats = len(new_traditional_stats)
                 updated_trad_entries  = new_traditional_stats - old_traditional_stats
 
-                return "Traditional stats file has been updated.\n{num} entries were added to the traditional stats .csv file.".format(num = updated_trad_entries)
-                
+                if updated_trad_entries > 0:
+                    return "Traditional stats file has been updated.\n{num} entries were added to the traditional stats .csv file.".format(num = updated_trad_entries)
+                else:
+                    return "Traditional stats file was not updated, no new entries to add."
             else:
                 all_traditional_stats = scrape_all_Trad(trad_year)
                 all_added_entries = len(all_traditional_stats)
@@ -88,6 +90,6 @@ def update_traditional_stats(trad_year, trad_pages, all_trad_pages):
         return "No new traditional stats were collected."
 
 #%%
-run_updates(adv_year = 2024, adv_pages = 5, trad_year= 2024, trad_pages= 5)
+run_updates(adv_year = 2024, adv_pages = 1, trad_year= 2024, trad_pages= 1)
 
 # %%
