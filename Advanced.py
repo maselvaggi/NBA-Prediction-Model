@@ -1,14 +1,17 @@
 #%%
-import pandas as pd
 import time
+import os.path
+import pandas as pd
+
 from tqdm import tqdm
+from schedule import *
 from selenium import webdriver
 from remove_duplicates import *
 from selenium.webdriver.common.by import By
 # from selenium.webdriver.support.ui import WebDriverWait
 # from selenium.webdriver.support import expected_conditions as EC
 # import requests
-
+#%%
 def scrape_all_ADV(year):
     '''
     This function will scrape all of the advavnced player box scores from the current nba regular
@@ -240,7 +243,48 @@ def remove_duplicates(data):
         data = data.drop(index = i[0])    
     return data
 
+def update_advanced_stats(adv_year, adv_pages, all_adv_pages):
+    #protect against random inputs
+    if adv_year != 2023 and adv_year != 2024 and adv_year != 0:
+        raise ValueError('No Advanced Stats data for year: {num}. Please use 2023 or 2024.'.format(num = adv_year))
+    #if value is 2023 or 2024 and positive pages
+    if adv_year != 0 and adv_pages != 0:
+        if all_adv_pages == True:
+            all_advanced_stats = scrape_all_ADV(adv_year)
+            all_added_entries = len(all_advanced_stats)
+
+            create_schedule(adv_year)
+            return "All advanced stats were collected. \n {num} entries were collected. \n The {year} season schedule has been updated.".format(num = all_added_entries, year = adv_year)
+        else:
+            #if there is no file to update, must collect all data
+            if os.path.exists('output/{num}/Advanced{num}.csv'.format(num = adv_year)):
+                old_advanced_stats = pd.read_csv('output/{num}/Advanced{num}.csv'.format(num = adv_year))
+                old_advanced_stats = len(old_advanced_stats)
+
+                new_advanced_stats = scrape_new_ADV(adv_year, adv_pages)
+                new_advanced_stats = len(new_advanced_stats)
+                updated_adv_entries = new_advanced_stats - old_advanced_stats
+
+                if updated_adv_entries > 0:
+                    create_schedule(adv_year)
+                    return "Advanced stats file has been updated.\n{num} entries were added to the Advanced stats .csv file.\nThe {year} season schedule file has been updated.".format(num = updated_adv_entries, year = adv_year)       
+
+                else:
+                    return "Advanced stats file was not updated, no new entries to add.\nThe {num} season schedule was not updated.".format(num = adv_year)
+
+            else:
+                all_advanced_stats = scrape_all_ADV(adv_year)
+                all_added_entries = len(all_advanced_stats)
+                create_schedule(adv_year)
+
+                return "All advanced stats were collected. \n{num} entries were collected. \n The {year} season schedule has been updated.".format(num = all_added_entries, year = adv_year)
+    #if not input, just skip
+    else:
+        return "No new advanced stats were collected."
+
+
 #%%
 if __name__ == "__main__":
     scrape_all_ADV()
     scrape_new_ADV()
+    update_advanced_stats()

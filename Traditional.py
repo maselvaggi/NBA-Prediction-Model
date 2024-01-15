@@ -1,6 +1,8 @@
 #%%
-import pandas as pd
 import time
+import os.path
+import pandas as pd
+
 from tqdm import tqdm
 from selenium import webdriver
 from remove_duplicates import *
@@ -287,7 +289,41 @@ def Trad_format_rows(T_box_scores):
     
     return T_box_scores
 
+
+def update_traditional_stats(trad_year, trad_pages, all_trad_pages):
+    if trad_year != 2023 and trad_year != 2024 and trad_year != 0:
+        raise ValueError('No traditional stats data for year provided. Please use 2023 or 2024.')
+
+    if trad_year != 0 and trad_pages != 0:
+        if all_trad_pages == True:
+            all_traditional_stats = scrape_all_Trad(trad_year)
+            all_added_entries = len(all_traditional_stats)
+
+            return "All traditional stats were collected. \n {num} entries were collected.".format(num = all_added_entries)
+        else:
+            if os.path.exists('output/{num}/Traditional{num}.csv'.format(num = trad_year)):
+                old_traditional_stats = pd.read_csv('output/{num}/Traditional{num}.csv'.format(num = trad_year))
+                old_traditional_stats = len(old_traditional_stats)
+
+                new_traditional_stats = scrape_new_Trad(trad_year, trad_pages)
+                new_traditional_stats = len(new_traditional_stats)
+                updated_trad_entries  = new_traditional_stats - old_traditional_stats
+
+                if updated_trad_entries > 0:
+                    return "Traditional stats file has been updated.\n{num} entries were added to the traditional stats .csv file.".format(num = updated_trad_entries)
+                else:
+                    return "Traditional stats file was not updated, no new entries to add."
+            else:
+                all_traditional_stats = scrape_all_Trad(trad_year)
+                all_added_entries = len(all_traditional_stats)
+
+                return "All traditional stats have been collected.\n{num} entries were collected.".format(num = all_added_entries)
+                
+    else:
+        return "No new traditional stats were collected."
+
 # %%
 if __name__ == "__main__":
     scrape_all_Trad()
     scrape_new_Trad()
+    update_traditional_stats()
