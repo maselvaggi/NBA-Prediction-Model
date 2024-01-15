@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 #%% Get all game IDs for 2022-2023 regular season
 #   Create .txt to save game IDs so no need to rerun    
-def get_game_ids(year):
+def get_game_ids(year: int = 0):
     '''
     There are 1230 games in a NBA regular season. Each game ID corresponds
     to a regular season game on ESPN.go.com.  The range of game ids from the
@@ -21,13 +21,16 @@ def get_game_ids(year):
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.111 Safari/537.36'}
 
     link = 'https://www.espn.com/nba/game/_/gameId/'
-
-    if year == 2023 or year == '2023':
+    if type(year) != int:
+        raise ValueError("Please enter input in the form of an integer.")
+    elif year == 2023:
         game_ids = get_2023_game_ids(link, headers)
         return game_ids
-    elif year == 2023 or year == '2024':
+    elif year == 2024:
         game_ids = get_2024_game_ids(link, headers)
         return game_ids
+    elif year == 0:
+        raise ValueError("Please enter a year to get game IDs: 2023 or 2024")
     else:
         return 'This data is not available yet.' 
 
@@ -118,7 +121,7 @@ def get_game_info(year):
     game_info = []
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.111 Safari/537.36'}
 
-    if year == '2023':
+    if year == 2023:
         game_ids = open('output/{num}/GameIDs{num}.txt'.format(num = year))
         game_ids = game_ids.read()
         game_ids = game_ids.split('\n')
@@ -173,7 +176,7 @@ def get_game_info(year):
         away_team = teams[1][0:3]
         home_team = teams[2][0:3]
 
-        info = '='.join([date, away_team, home_team, favorite, spread, over_under, attendance, capacity])
+        info = '='.join([date, away_team, home_team, favorite, spread, over_under, attendance, capacity, game_ids[i]])
         info = info.split('=')  
 
         game_info.append(info)
@@ -191,7 +194,7 @@ def get_game_info(year):
         game_info[i][0] = game_info[i][0].replace('March','03').replace(', ', '/').replace(' ', '/')
         game_info[i][0] = game_info[i][0].replace('April','04').replace(', ', '/').replace(' ', '/') 
 
-    game_lines = pd.DataFrame(game_info, columns=['Date', 'Home', 'Away', 'Favorite', 'Spread', 'O/U','Attendance', 'Capacity'], index = None)
+    game_lines = pd.DataFrame(game_info, columns=['Date', 'Home', 'Away', 'Favorite', 'Spread', 'O/U','Attendance', 'Capacity', 'Game ID'], index = None)
     game_lines = game_lines.replace('WSH', 'WAS').replace('SA','SAS').replace('SA<','SAS').replace('NY','NYK').replace('NY<','NYK').replace('NO','NOP').replace('NO<','NOP').replace('GS','GSW').replace('GS<','GSW').replace('UTAH','UTA')
     game_lines.to_csv('output/{num}/Caesars_Lines{num}.csv'.format(num = year))  
 

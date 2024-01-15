@@ -18,17 +18,6 @@ def scrape_all_ADV(year):
     season up until today's date.  Using the ChromeDriver.exe, we are able to easily
     parse through the tables of data and save the data in a .csv file and return a 
     dataframe.
-
-    I only recommend using this function if you are starting out.  This function will
-    take a lot of time to run.  The time.sleep is put in there to be kind to NBA.com.
-
-    NBA.com has caught on to the script and will change the location of the pop up in
-    the xpath.  Highly recommend just waiting a second after the popup becomes visible
-    to see if the script can click out of the popup (if the script is successful, the 
-    popup will be exited almost immediately), if not, just click out of the pop up
-    yourself and the script will then be able to scrape all the necessay data.
-
-    If you do not click out of the popup, the script will stop and return an error.
     '''
     if year == 2023 or year == '2023':
         link = 'https://www.nba.com/stats/players/boxscores-advanced?Season=2022-23'
