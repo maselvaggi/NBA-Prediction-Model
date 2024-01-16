@@ -53,7 +53,7 @@ def scrape_all_traditional_stats(year):
             s = "".join(map(str, row))
             file.write(s+'\n')
             
-    trad_all = clean_all_trad(year)
+    trad_all = clean_new_traditional_stats(year)
     
     df_T = pd.DataFrame(trad_all, columns=['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 
                                            'Mins', 'Points', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%',
@@ -67,26 +67,6 @@ def scrape_all_traditional_stats(year):
 
 
     return df_T
-    
-    
-def clean_all_trad(year):
-    """
-    I save the data in a txt file to have a copy, and it makes it easier to 
-    view after splitting by new line.
-    """
-    traditional = open('output/{num}/Traditionalfile{num}.txt'.format(num = year))
-    traditional = traditional.read()
-    T_game_logs = traditional.split("\n")
-    T_game_logs.pop()
-    
-    T_box_scores = []
-    for i in range(len(T_game_logs)):
-        T_box_scores.append(T_game_logs[i].split(" "))
-    
-    T_box_scores = trad_format_rows(T_box_scores)
-    
-    return T_box_scores
-
 
 def trad_format_rows(T_box_scores):
     """
@@ -200,7 +180,7 @@ def scrape_new_traditional_stats(year, pages):
             s = "".join(map(str, row))
             file.write(s+'\n')
             
-    trad_new = clean_new_trad(year)
+    trad_new = clean_new_traditional_stats(year)
     
     df_T_new = pd.DataFrame(trad_new, columns=['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 
                                       'Mins', 'Points', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%',
@@ -221,9 +201,9 @@ def scrape_new_traditional_stats(year, pages):
     
     return traditional    
 
-def clean_new_trad(year):
+def clean_new_traditional_stats(year):
     
-    traditional = open('output/{num}/NewTraditionalfile{num}.txt'.format(num = year))
+    traditional = open('output/{num}/NewTraditionalStats{num}.txt'.format(num = year))
     traditional = traditional.read()
     T_game_logs = traditional.split("\n")
     T_game_logs.pop()
@@ -235,49 +215,6 @@ def clean_new_trad(year):
     T_box_scores = trad_format_rows(T_box_scores)
     
     return T_box_scores
-
-def trad_format_rows(T_box_scores):
-    """
-    This function builds a list of lists.  Each list within the larger list
-    will be a row in the dataframe.  
-    """
-    for i in range(len(T_box_scores)):
-        player = []
-
-        #Some players have a suffix such as Jr., Sr., 'II', 'III', etc
-        #When splitting each line by space, those player with a suffix
-        #will have an extra element length wise
-        if len(T_box_scores[i]) == 28:
-            player.append(T_box_scores[i][0] + " " + T_box_scores[i][1])
-            player.append(T_box_scores[i][2])
-
-            if T_box_scores[i][4] == "@":
-                player.append("A")
-            else:
-                player.append("H")
-                
-            player.append(T_box_scores[i][5])
-
-            for j in range(6, 28):
-                player.append(T_box_scores[i][j])
-            T_box_scores[i] = player
-        else:
-            player.append(T_box_scores[i][0] + " " + T_box_scores[i][1] + " " + T_box_scores[i][2])
-            player.append(T_box_scores[i][3])
-
-            if T_box_scores[i][5] == "@":
-                player.append("A")
-            else:
-                player.append("H")
-
-            player.append(T_box_scores[i][6])
-            for j in range(7, len(T_box_scores[i])):
-                player.append(T_box_scores[i][j])
-                
-        T_box_scores[i] = player   
-    
-    return T_box_scores
-
 
 def update_traditional_stats(trad_year, trad_pages, all_trad_pages):
 

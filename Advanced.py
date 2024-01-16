@@ -53,7 +53,7 @@ def scrape_all_advanced_stats(year):
             s = "".join(map(str, row))
             file.write(s+'\n')
     
-    All_adv_scores = clean_all_advanced_stats(year)
+    All_adv_scores = clean_new_advanced_stats(year)
     
     df_A = pd.DataFrame(All_adv_scores, columns=['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins',
                                                  'OFFRTG', 'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%',
@@ -64,24 +64,6 @@ def scrape_all_advanced_stats(year):
     
     return df_A
 
-def clean_all_advanced_stats(year):
-    """
-    This fucntion takes in the newly scraped advanced player box scores from the .txt file.
-    Then, the string is split by line, and then split by ' '.  
-    """
-    advanced = open('output/{num}/Advancedfile{num}.txt'.format(num = year))
-    advanced = advanced.read()
-    A_game_logs = advanced.split("\n")
-    A_game_logs.pop()
-    
-    A_box_scores = []
-    for i in range(len(A_game_logs)):
-        A_box_scores.append(A_game_logs[i].split(" "))
-    
-    all_adv_scores = adv_format_rows(A_box_scores)
-    
-    return all_adv_scores
-    
 def adv_format_rows(A_box_scores):
     """
     The newly created list of lists is then cleaned according to if the player has a suffix
@@ -198,7 +180,7 @@ def clean_new_advanced_stats(year):
     in their name or not.  The end goal is to create uniform length lists with which to create
     a dataframe to then save to a .csv. 
     """    
-    advanced = open('output/{num}/NewAdvancedfile{num}.txt'.format(num = year))
+    advanced = open('output/{num}/NewAdvancedStats{num}.txt'.format(num = year))
     advanced = advanced.read()
     A_game_logs = advanced.split("\n")
     A_game_logs.pop()
