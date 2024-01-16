@@ -29,4 +29,5 @@ def run_updates(adv_year: int = 0, adv_pages: int = 0, all_adv_pages: bool = Fal
 #%%
 run_updates(adv_year = 2024, adv_pages = 10, trad_year= 2024, trad_pages= 10)
 
+
 # %%

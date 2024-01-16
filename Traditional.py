@@ -10,23 +10,12 @@ from selenium.webdriver.common.by import By
 # from selenium.webdriver.support.ui import WebDriverWait
 # from selenium.webdriver.support import expected_conditions as EC
 #%%
-def scrape_all_Trad(year):
+def scrape_all_traditional_stats(year):
     '''
     This function will scrape all of the player box scores from the current nba regular
     season up until today's date.  Using the ChromeDriver.exe, we are able to easily
     parse through the tables of data and save the data in a .csv file and return a 
     dataframe.
-
-    I only recommend using this function if you are starting out.  This function will
-    take a lot of time to run.  The time.sleep is put in there to be kind to NBA.com.
-
-    NBA.com has caught on to the script and will change the location of the pop up in
-    the xpath.  Highly recommend just waiting a second after the popup becomes visible
-    to see if the script can click out of the popup (if the script is successful, the 
-    popup will be exited almost immediately), if not, just click out of the pop up
-    yourself and the script will then be able to scrape all the necessay data.
-
-    If you do not click out of the popup, the script will stop and return an error.
     '''
     if year == 2023 or year == '2023':
         link = 'https://www.nba.com/stats/players/boxscores-traditional?Season=2022-23'
@@ -64,7 +53,7 @@ def scrape_all_Trad(year):
             s = "".join(map(str, row))
             file.write(s+'\n')
             
-    trad_all = clean_all_Trad(year)
+    trad_all = clean_all_trad(year)
     
     df_T = pd.DataFrame(trad_all, columns=['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 
                                            'Mins', 'Points', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%',
@@ -80,7 +69,7 @@ def scrape_all_Trad(year):
     return df_T
     
     
-def clean_all_Trad(year):
+def clean_all_trad(year):
     """
     I save the data in a txt file to have a copy, and it makes it easier to 
     view after splitting by new line.
@@ -94,12 +83,12 @@ def clean_all_Trad(year):
     for i in range(len(T_game_logs)):
         T_box_scores.append(T_game_logs[i].split(" "))
     
-    T_box_scores = Trad_format_rows(T_box_scores)
+    T_box_scores = trad_format_rows(T_box_scores)
     
     return T_box_scores
 
 
-def Trad_format_rows(T_box_scores):
+def trad_format_rows(T_box_scores):
     """
     This function formats each list eleemnt into a format that will be transformed into a dataframe
     of all traditional stat box scores.
@@ -141,7 +130,7 @@ def Trad_format_rows(T_box_scores):
     
     return T_box_scores
 
-def scrape_new_Trad(year, pages):
+def scrape_new_traditional_stats(year, pages):
     """
     This fucntion does exactly the same as scrape_all_Trad() but you can specify
     how many pages of player box scores you want to scrape.
@@ -211,7 +200,7 @@ def scrape_new_Trad(year, pages):
             s = "".join(map(str, row))
             file.write(s+'\n')
             
-    trad_new = clean_new_Trad(year)
+    trad_new = clean_new_trad(year)
     
     df_T_new = pd.DataFrame(trad_new, columns=['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 
                                       'Mins', 'Points', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%',
@@ -232,7 +221,7 @@ def scrape_new_Trad(year, pages):
     
     return traditional    
 
-def clean_new_Trad(year):
+def clean_new_trad(year):
     
     traditional = open('output/{num}/NewTraditionalfile{num}.txt'.format(num = year))
     traditional = traditional.read()
@@ -243,11 +232,11 @@ def clean_new_Trad(year):
     for i in range(len(T_game_logs)):
         T_box_scores.append(T_game_logs[i].split(" "))
     
-    T_box_scores = Trad_format_rows(T_box_scores)
+    T_box_scores = trad_format_rows(T_box_scores)
     
     return T_box_scores
 
-def Trad_format_rows(T_box_scores):
+def trad_format_rows(T_box_scores):
     """
     This function builds a list of lists.  Each list within the larger list
     will be a row in the dataframe.  
@@ -291,12 +280,17 @@ def Trad_format_rows(T_box_scores):
 
 
 def update_traditional_stats(trad_year, trad_pages, all_trad_pages):
+
+    if type(trad_year) != int or type(trad_pages) != int:
+        raise ValueError("Please enter input in the form of an integer.")  
+    if type(all_trad_pages) != bool:
+        raise ValueError("Please enter boolean input for all_trad_pages.")
     if trad_year != 2023 and trad_year != 2024 and trad_year != 0:
         raise ValueError('No traditional stats data for year provided. Please use 2023 or 2024.')
 
     if trad_year != 0 and trad_pages != 0:
         if all_trad_pages == True:
-            all_traditional_stats = scrape_all_Trad(trad_year)
+            all_traditional_stats = scrape_all_traditional_stats(trad_year)
             all_added_entries = len(all_traditional_stats)
 
             return "All traditional stats were collected. \n {num} entries were collected.".format(num = all_added_entries)
@@ -305,7 +299,7 @@ def update_traditional_stats(trad_year, trad_pages, all_trad_pages):
                 old_traditional_stats = pd.read_csv('output/{num}/Traditional{num}.csv'.format(num = trad_year))
                 old_traditional_stats = len(old_traditional_stats)
 
-                new_traditional_stats = scrape_new_Trad(trad_year, trad_pages)
+                new_traditional_stats = scrape_new_traditional_stats(trad_year, trad_pages)
                 new_traditional_stats = len(new_traditional_stats)
                 updated_trad_entries  = new_traditional_stats - old_traditional_stats
 
@@ -314,7 +308,7 @@ def update_traditional_stats(trad_year, trad_pages, all_trad_pages):
                 else:
                     return "Traditional stats file was not updated, no new entries to add."
             else:
-                all_traditional_stats = scrape_all_Trad(trad_year)
+                all_traditional_stats = scrape_all_traditional_stats(trad_year)
                 all_added_entries = len(all_traditional_stats)
 
                 return "All traditional stats have been collected.\n{num} entries were collected.".format(num = all_added_entries)
@@ -324,6 +318,6 @@ def update_traditional_stats(trad_year, trad_pages, all_trad_pages):
 
 # %%
 if __name__ == "__main__":
-    scrape_all_Trad()
-    scrape_new_Trad()
+    scrape_all_traditional_stats()
+    scrape_new_traditional_stats()
     update_traditional_stats()

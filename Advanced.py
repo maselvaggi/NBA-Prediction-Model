@@ -12,7 +12,7 @@ from selenium.webdriver.common.by import By
 # from selenium.webdriver.support import expected_conditions as EC
 # import requests
 #%%
-def scrape_all_ADV(year):
+def scrape_all_advanced_stats(year):
     '''
     This function will scrape all of the advavnced player box scores from the current nba regular
     season up until today's date.  Using the ChromeDriver.exe, we are able to easily
@@ -53,7 +53,7 @@ def scrape_all_ADV(year):
             s = "".join(map(str, row))
             file.write(s+'\n')
     
-    All_adv_scores = clean_all_ADV(year)
+    All_adv_scores = clean_all_advanced_stats(year)
     
     df_A = pd.DataFrame(All_adv_scores, columns=['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins',
                                                  'OFFRTG', 'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%',
@@ -64,7 +64,7 @@ def scrape_all_ADV(year):
     
     return df_A
 
-def clean_all_ADV(year):
+def clean_all_advanced_stats(year):
     """
     This fucntion takes in the newly scraped advanced player box scores from the .txt file.
     Then, the string is split by line, and then split by ' '.  
@@ -78,11 +78,11 @@ def clean_all_ADV(year):
     for i in range(len(A_game_logs)):
         A_box_scores.append(A_game_logs[i].split(" "))
     
-    all_adv_scores = Adv_format_rows(A_box_scores)
+    all_adv_scores = adv_format_rows(A_box_scores)
     
     return all_adv_scores
     
-def Adv_format_rows(A_box_scores):
+def adv_format_rows(A_box_scores):
     """
     The newly created list of lists is then cleaned according to if the player has a suffix
     in their name or not.  The end goal is to create uniform length lists with which to create
@@ -124,7 +124,7 @@ def Adv_format_rows(A_box_scores):
         
     return A_box_scores
 
-def scrape_new_ADV(year, pages):
+def scrape_new_advanced_stats(year, pages):
     """
     This function scrapes a specified number of pages of advanced stats from NBA.com.
     Remember to toggle the number of pages as you see fit.
@@ -172,7 +172,7 @@ def scrape_new_ADV(year, pages):
             s = "".join(map(str, row))
             file.write(s+'\n')
     
-    adv_new = clean_new_ADV(year)
+    adv_new = clean_new_advanced_stats(year)
     
     df_A_new = pd.DataFrame(adv_new, columns=['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 
                                               'OFFRTG', 'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 
@@ -192,7 +192,7 @@ def scrape_new_ADV(year, pages):
     
     return advanced
 
-def clean_new_ADV(year):
+def clean_new_advanced_stats(year):
     """
     The newly created list of lists is then cleaned according to if the player has a suffix
     in their name or not.  The end goal is to create uniform length lists with which to create
@@ -207,7 +207,7 @@ def clean_new_ADV(year):
     for i in range(len(A_game_logs)):
         A_box_scores.append(A_game_logs[i].split(" "))
     
-    new_adv_scores = Adv_format_rows(A_box_scores)
+    new_adv_scores = adv_format_rows(A_box_scores)
     
     return new_adv_scores
     
@@ -234,12 +234,14 @@ def remove_duplicates(data):
 
 def update_advanced_stats(adv_year, adv_pages, all_adv_pages):
     #protect against random inputs
+    if type(adv_year) != int or type(adv_pages) != int:
+        raise ValueError("Please enter input in the form of an integer.")    
     if adv_year != 2023 and adv_year != 2024 and adv_year != 0:
         raise ValueError('No Advanced Stats data for year: {num}. Please use 2023 or 2024.'.format(num = adv_year))
     #if value is 2023 or 2024 and positive pages
     if adv_year != 0 and adv_pages != 0:
         if all_adv_pages == True:
-            all_advanced_stats = scrape_all_ADV(adv_year)
+            all_advanced_stats = scrape_all_advanced_stats(adv_year)
             all_added_entries = len(all_advanced_stats)
 
             create_schedule(adv_year)
@@ -250,7 +252,7 @@ def update_advanced_stats(adv_year, adv_pages, all_adv_pages):
                 old_advanced_stats = pd.read_csv('output/{num}/Advanced{num}.csv'.format(num = adv_year))
                 old_advanced_stats = len(old_advanced_stats)
 
-                new_advanced_stats = scrape_new_ADV(adv_year, adv_pages)
+                new_advanced_stats = scrape_new_advanced_stats(adv_year, adv_pages)
                 new_advanced_stats = len(new_advanced_stats)
                 updated_adv_entries = new_advanced_stats - old_advanced_stats
 
@@ -262,7 +264,7 @@ def update_advanced_stats(adv_year, adv_pages, all_adv_pages):
                     return "Advanced stats file was not updated, no new entries to add.\nThe {num} season schedule was not updated.".format(num = adv_year)
 
             else:
-                all_advanced_stats = scrape_all_ADV(adv_year)
+                all_advanced_stats = scrape_all_advanced_stats(adv_year)
                 all_added_entries = len(all_advanced_stats)
                 create_schedule(adv_year)
 
@@ -274,6 +276,6 @@ def update_advanced_stats(adv_year, adv_pages, all_adv_pages):
 
 #%%
 if __name__ == "__main__":
-    scrape_all_ADV()
-    scrape_new_ADV()
+    scrape_all_advanced_stats()
+    scrape_new_advanced_stats()
     update_advanced_stats()
