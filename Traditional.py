@@ -48,7 +48,7 @@ def scrape_all_traditional_stats(year):
         
     driver.quit()
     
-    with open('output/{num}/Traditionalfile{num}.txt'.format(num = year), 'w') as file:
+    with open('output/{num}/NewTraditionalStats{num}.txt'.format(num = year), 'w') as file:
         for row in tables:
             s = "".join(map(str, row))
             file.write(s+'\n')
@@ -175,7 +175,7 @@ def scrape_new_traditional_stats(year, pages):
         
     driver.quit()
     
-    with open("output/{num}/NewTraditionalfile{num}.txt".format(num = year), 'w') as file:
+    with open("output/{num}/NewTraditionalStats{num}.txt".format(num = year), 'w') as file:
         for row in tables:
             s = "".join(map(str, row))
             file.write(s+'\n')

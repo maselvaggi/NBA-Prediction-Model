@@ -48,7 +48,7 @@ def scrape_all_advanced_stats(year):
     
     driver.quit()
 
-    with open("output/{num}/Advancedfile{num}.txt".format(num = year), 'w') as file:
+    with open("output/{num}/NewAdvancedStats{num}.txt".format(num = year), 'w') as file:
         for row in A_tables:
             s = "".join(map(str, row))
             file.write(s+'\n')
@@ -149,7 +149,7 @@ def scrape_new_advanced_stats(year, pages):
     
     driver.quit()
 
-    with open("output/{num}/NewAdvancedfile{num}.txt".format(num = year), 'w') as file:
+    with open("output/{num}/NewAdvancedStats{num}.txt".format(num = year), 'w') as file:
         for row in A_tables:
             s = "".join(map(str, row))
             file.write(s+'\n')
