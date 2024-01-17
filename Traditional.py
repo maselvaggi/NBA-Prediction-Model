@@ -115,10 +115,6 @@ def scrape_new_traditional_stats(year, pages):
     This fucntion does exactly the same as scrape_all_Trad() but you can specify
     how many pages of player box scores you want to scrape.
 
-    Similar to scrape_all_trad(), make sure to see if the popup get closed out by the script.
-    After about a seceond, just click out of the popup and the script will run like normal.
-
-    If you do not click out of the script, there will be a error and the script will stop.
     """
 
     if year == 2023 or year == '2023':
@@ -130,28 +126,6 @@ def scrape_new_traditional_stats(year, pages):
     driver.get(link)
     driver.maximize_window()
 
-    #WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[5]/div[3]/div/div/div/button"))).click()
-    # driver.implicitly_wait(50)
-    # try:
-    #     tables = []
-    #     for i in range(1, 20):
-    #         text = driver.find_element_by_xpath('//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[3]/table/tbody').text
-    #         tables.append(text)
-    #         driver.find_element_by_xpath('//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[5]/button[2]').click()
-    #         time.sleep(1)
-            
-    #     driver.quit()
-    # except Exception:
-    #     try:
-    #         driver.find_element_by_xpath('/html/body/div[6]/div[3]/div/div/div/button').click()
-    #     except Exception:
-    #         try:
-    #             driver.find_element_by_xpath('/html/body/div[5]/div[3]/div/div/div/button').click()
-    #         except Exception:
-    #             try:
-    #                 driver.find_element_by_xpath('/html/body/div[4]/div[3]/div/div/div/button').click()
-    #             except Exception:
-    #                 pass
     time.sleep(20)        
     driver.find_element(By.XPATH, '/html/body/div[3]/div[2]/div/div[2]/button').click()
     time.sleep(20)
@@ -187,15 +161,19 @@ def scrape_new_traditional_stats(year, pages):
                                        'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'STL', 
                                        'BLK', 'TOV', 'PF', 'Plusminus'])
     
-    df_T_new[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus' ]] = df_T_new[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']].apply(pd.to_numeric) 
+    df_T_new[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus' ]] = df_T_new[['Mins', 'Points', 'FGM','FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV','PF', 'Plusminus']].apply(pd.to_numeric) 
     df_T_new[['FG%', '3P%', 'FT%']] = df_T_new[['FG%', '3P%', 'FT%']].astype(float)
     
     traditional_old = pd.read_csv("output/{num}/Traditional{num}.csv".format(num = year))
     traditional = pd.concat([df_T_new, traditional_old], ignore_index=True, sort=False)
-    traditional = traditional[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'Points', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%','FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']]
+    traditional = traditional[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'Points',
+                               'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%','FTM', 'FTA', 'FT%', 'OREB', 'DREB',
+                               'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']]
     traditional = traditional.drop_duplicates().reset_index()
     #keeps old indexes as column. So I'm just overwriting it in a lazy way-- look into better way
-    traditional = traditional[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'Points', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%','FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']]
+    traditional = traditional[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'Points', 
+                               'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%','FTM', 'FTA', 'FT%', 'OREB', 'DREB', 
+                               'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']]
     traditional = remove_duplicates(traditional)
     traditional.to_csv('output/{num}/Traditional{num}.csv'.format(num = year))
     

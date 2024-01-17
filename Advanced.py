@@ -227,7 +227,7 @@ def update_advanced_stats(adv_year, adv_pages, all_adv_pages):
             all_added_entries = len(all_advanced_stats)
 
             create_schedule(adv_year)
-            return "All advanced stats were collected. \n {num} entries were collected. \n The {year} season schedule has been updated.".format(num = all_added_entries, year = adv_year)
+            return "All advanced stats were collected. \n {num} entries were collected. \nThe {year} season schedule has been updated.".format(num = all_added_entries, year = adv_year)
         else:
             #if there is no file to update, must collect all data
             if os.path.exists('output/{num}/Advanced{num}.csv'.format(num = adv_year)):
