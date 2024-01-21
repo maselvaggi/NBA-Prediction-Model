@@ -3,8 +3,8 @@ from advanced import *
 from traditional import *
 from espn_game_info import *
 from schedule import *
-#%%
 
+#%%
 def run_updates(adv_year: int = 0, adv_pages: int = 0, all_adv_pages: bool = False, trad_year: int = 0, trad_pages: int = 0, all_trad_pages: bool = False, espn_game_info_year: int = 0, get_all_espn_game_info: bool = False):
     '''
     This function is meant to be the only piece of code that the user will need to 
@@ -30,5 +30,4 @@ def run_updates(adv_year: int = 0, adv_pages: int = 0, all_adv_pages: bool = Fal
     return "Updates are complete."
 
 #%%
-run_updates()
-
+run_updates(espn_game_info_year=2024)

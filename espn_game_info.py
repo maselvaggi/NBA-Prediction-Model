@@ -41,7 +41,7 @@ def update_espn_game_info(year, get_all_espn_game_info):
 def get_2023_game_ids(link, headers, get_all_espn_game_info):
     new_game_info = []
     if get_all_espn_game_info is False and os.path.exists('output/2023/ESPN_game_info2023.csv') is True:
-        collected_game_ids = pd.read_csv('output/2023/ESPN_game_info2023.csv')
+        collected_game_ids = pd.read_csv('output/2023/ESPN_game_info2023.csv', index_col=0)
         max_game_id = collected_game_ids['Game ID'].max()
 
         if max_game_id != 401469385:
@@ -66,7 +66,7 @@ def get_2023_game_ids(link, headers, get_all_espn_game_info):
         all_game_info = all_game_info.drop_duplicates()
         all_game_info.to_csv('output/2023/ESPN_game_info2023.csv')  
         entries_added = len(all_game_info) - len(collected_game_ids)
-        return "All available 2023 game info was collected. \n {num} entries were collected.".format(num = entries_added)
+        return f"All available 2023 game info was collected. \n {entries_added} entries were collected."
     else:
         for game in tqdm(range(401468016, 401469385+1)):
             if game == 401468924:
@@ -81,64 +81,92 @@ def get_2023_game_ids(link, headers, get_all_espn_game_info):
         new_game_info = new_game_info.replace('WSH', 'WAS').replace('SA','SAS').replace('SA<','SAS').replace('NY','NYK').replace('NY<','NYK').replace('NO','NOP').replace('NO<','NOP').replace('GS','GSW').replace('GS<','GSW').replace('UTAH','UTA')
         new_game_info.to_csv('output/2023/ESPN_game_info2023.csv') 
 
-        return "All available 2023 game information was collected.\n{num} entries were collected".format(num = len(new_game_info))   
+        return f"All available 2023 game information was collected.\n{len(new_game_info)} entries were collected"   
 
 def get_2024_game_ids(link, headers, get_all_espn_game_info):
     new_game_info = []
+    game_information = []
     if get_all_espn_game_info is False and os.path.exists('output/2024/ESPN_game_info2024.csv') is True:
-        collected_game_ids = pd.read_csv('output/2024/ESPN_game_info2024.csv')
-        max_game_id = collected_game_ids['Game ID'].max()
+        collected_game_ids = pd.read_csv('output/2024/ESPN_game_info2024.csv', index_col=0)
+        max_game_id = int(collected_game_ids['Game ID'].max())
 
-        if max_game_id != 401469385:
-            for game in range(max_game_id+1, 401469385+1):
+        if max_game_id != 401585828:
+            for game in tqdm(range(max_game_id+1, 401585828+1)):
+                if game == 401585204 or game == 401585217:
+                    #games PPD due to the passing of Warriors assistant 
+                    #coach Dejan Milojevic- RIP
+                    continue
                 url = ''.join([link, str(game)])
                 record = requests.get(url, headers = headers)
                 if record.status_code == 200:
                     try:
-                        new_game_info.append(get_game_info(game))
+                        if game != max_game_id+1:
+                            new_game_info = get_game_info(game)
+                            new_game_info = pd.DataFrame(new_game_info).T
+                            new_game_info.columns =  ['Date', 'Home', 'Away', 'Favorite', 'Spread', 'O/U','Attendance', 'Capacity', 'Game ID']
+                            game_information = pd.concat([game_information, new_game_info], ignore_index = True)#[len(game_information)] = new_game_info
+                        else:
+                            game_information = get_game_info(game)
+                            game_information = pd.DataFrame(game_information).T
+                            game_information.columns = ['Date', 'Home', 'Away', 'Favorite', 'Spread', 'O/U','Attendance', 'Capacity', 'Game ID']
                     except IndexError:
                         entries_added = (game-1) - max_game_id
                         if entries_added > 1:
-                            print('There was information gathered for {num} games.'.format(num = entries_added))
+                            print(game_information)
+                            print(f'There was information gathered for {entries_added} games.')
                         elif entries_added == 1:
                             print('There was information gathered for 1 game.')
                         else:
                             return "There is no 2024 game information to collect. The file is up to date."
                         break
-            if len(new_game_info) > 0:
-                new_game_info = pd.DataFrame(new_game_info, columns=['Date', 'Home', 'Away', 'Favorite', 'Spread', 'O/U','Attendance', 'Capacity', 'Game ID'], index = None)
-                new_game_info = new_game_info.replace('WSH', 'WAS').replace('SA','SAS').replace('SA<','SAS').replace('NY','NYK').replace('NY<','NYK').replace('NO','NOP').replace('NO<','NOP').replace('GS','GSW').replace('GS<','GSW').replace('UTAH','UTA')
-                all_game_info = pd.concat([collected_game_ids, new_game_info], ignore_index=True, sort = False)
-                all_game_info = all_game_info.drop_duplicates()
+
+            if len(game_information) > 0:
+                all_game_info = pd.concat([collected_game_ids, game_information], ignore_index=True)
+                all_game_info['Attendance'] = all_game_info['Attendance'].astype(str)
+                all_game_info = all_game_info[~all_game_info['Attendance'].str.contains('\[]')]
+                #all_game_info = all_game_info.drop_duplicates()
                 all_game_info.to_csv('output/2024/ESPN_game_info2024.csv')  
                 entries_added = len(all_game_info) - len(collected_game_ids)
 
-                return all_game_info, "All available game info was collected.\n{num} entries were collected.".format(num = entries_added)
+
+                return f"All available game info was collected for {entries_added} games."
 
         else:
-            return [], "No game to add to the 2024 season schedule."
+            print('print this')
+            return "No game to add to the 2024 season schedule."
     else:
         for game in tqdm(range(401584689, 401585828+1)):
+            if game == 401585204 or game == 401585217:
+                #games PPD due to the passing of Warriors assistant 
+                #coach Dejan Milojevic- RIP
+                continue
             url = ''.join([link, str(game)])
             record = requests.get(url, headers = headers)
             if record.status_code == 200:
                 try:
-                    new_game_info.append(get_game_info(game))
+                    if game != max_game_id+1:
+                        new_game_info = get_game_info(game)
+                        new_game_info = pd.DataFrame(new_game_info).T
+                        new_game_info.columns =  ['Date', 'Home', 'Away', 'Favorite', 'Spread', 'O/U','Attendance', 'Capacity', 'Game ID']
+                        game_information = pd.concat([game_information, new_game_info], ignore_index = True)#[len(game_information)] = new_game_info
+                    else:
+                        game_information = get_game_info(game)
+                        game_information = pd.DataFrame(game_information).T
+                        game_information.columns = ['Date', 'Home', 'Away', 'Favorite', 'Spread', 'O/U','Attendance', 'Capacity', 'Game ID']
+
                 except IndexError:
                     entries_added = (game-1) - max_game_id
                     if entries_added > 1:
-                        print('There was information gathered for {num} games.'.format(num = entries_added))
+                        print(f'There was information gathered for {entries_added} games.')
                     elif entries_added == 1:
                         print('There was information gathered for 1 game.')
                     else:
-                        return [], "There was no game information collected. The file is up to date."
+                        return "There was no game information collected. The file is up to date."
                     break
 
-        new_game_info = pd.DataFrame(new_game_info, columns=['Date', 'Home', 'Away', 'Favorite', 'Spread', 'O/U','Attendance', 'Capacity', 'Game ID'], index = None)
-        new_game_info = new_game_info.replace('WSH', 'WAS').replace('SA','SAS').replace('SA<','SAS').replace('NY','NYK').replace('NY<','NYK').replace('NO','NOP').replace('NO<','NOP').replace('GS','GSW').replace('GS<','GSW').replace('UTAH','UTA')
-        new_game_info.to_csv('output/2024/ESPN_game_info2024.csv') 
-        
-        return new_game_info, "All available game information was successfully collected.\n{num} entries were collected.".format(num = len(new_game_info))
+        game_information.to_csv('output/2024/ESPN_game_info2024.csv') 
+    
+        return f"All available game information was successfully collected.\n{len(new_game_info)} entries were collected."
 
 def get_game_info(game_id):
     '''
@@ -150,10 +178,12 @@ def get_game_info(game_id):
 
     Last, it creates a dataframe and .csv file.
     '''
-    game_info = []
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.111 Safari/537.36'}
 
-    page = requests.get('https://www.espn.com/nba/game/_/gameId/{ID}'.format(ID = game_id), headers = headers)
+    page = requests.get(f'https://www.espn.com/nba/game/_/gameId/{game_id}', headers = headers)
+
+    #I will be kind to your website, if you let me scrape easily :)
+    time.sleep(2.5)    
     soup = BeautifulSoup(page.content, "lxml")
     
     #line, o/u, date, attendance, capacity from Game Information Table
@@ -197,26 +227,17 @@ def get_game_info(game_id):
     away_team = teams[1][0:3]
     home_team = teams[2][0:3]
 
-    info = '='.join([date, away_team, home_team, favorite, spread, over_under, attendance, capacity, game_ids[i]])
+    info = '='.join([date, away_team, home_team, favorite, spread, over_under, attendance, capacity, str(game_id)])
+    info = info.replace('WSH', 'WAS').replace('SASC','SAC').replace('SA','SAS').replace('SA<','SAS').replace('NY','NYK').replace('NY<','NYK').replace('NO','NOP').replace('NOP<','NOP').replace('NO<','NOP').replace('GS','GSW').replace('GS<','GSW').replace('UTAH','UTA')
+    info = info.replace('October','10').replace(', ', '/').replace(' ', '/').replace('November','11').replace(', ', '/').replace(' ', '/').replace('December','12').replace(', ', '/').replace(' ', '/')
+    info = info.replace('January','01').replace(', ', '/').replace(' ', '/').replace('February','02').replace(', ', '/').replace(' ', '/').replace('March','03').replace(', ', '/').replace(' ', '/')
+    info = info.replace('April','04').replace(', ', '/').replace(' ', '/') 
     info = info.split('=')  
+    
 
-    game_info.append(info)
-
-
-    #I will be kind to your website, if you let me scrape easily :)
-    time.sleep(1)
-
-    for i in range(len(game_info)):
-        game_info[i][0] = game_info[i][0].replace('October','10').replace(', ', '/').replace(' ', '/')
-        game_info[i][0] = game_info[i][0].replace('November','11').replace(', ', '/').replace(' ', '/')
-        game_info[i][0] = game_info[i][0].replace('December','12').replace(', ', '/').replace(' ', '/')
-        game_info[i][0] = game_info[i][0].replace('January','01').replace(', ', '/').replace(' ', '/')
-        game_info[i][0] = game_info[i][0].replace('February','02').replace(', ', '/').replace(' ', '/')
-        game_info[i][0] = game_info[i][0].replace('March','03').replace(', ', '/').replace(' ', '/')
-        game_info[i][0] = game_info[i][0].replace('April','04').replace(', ', '/').replace(' ', '/') 
-
-    return game_info
+    return info
 
 #%%
 if __name__ == "__main__":
-    get_all_espn_game_info()
+    update_espn_game_info()
+
