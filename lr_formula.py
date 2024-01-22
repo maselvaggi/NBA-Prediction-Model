@@ -21,11 +21,11 @@ def lr_test(year, gp_weights):
 
     This model goes through 100 random states to ensure diverse sampling.
     '''
-    schedule = pd.read_csv('output/{num}/Schedule{num}.csv'.format(num = year), index_col=0)
+    schedule = pd.read_csv(f"output/{year}/Schedule{year}.csv", index_col=0)
     day      = schedule[schedule['Date'] == '11/20/2022'].index
     schedule = schedule.loc[:day[-1]]
     dates = schedule['Date'].unique()
-    matchups = pd.read_csv('output/{num}/Caesars_Lines{num}.csv'.format(num = year), index_col=0)
+    matchups = pd.read_csv(f"output/{year}/Caesars_Lines{year}.csv", index_col=0)
     day      = matchups[matchups['Date'] == '11/20/2022'].index
     matchups = matchups.iloc[day[0]:]
     matchup_dates = matchups['Date'].unique()
@@ -57,9 +57,7 @@ def lr_test(year, gp_weights):
         dates[i] = date
 
     for a in range(len(dates)):
-        directory = 'output/{num}/Seasonal Stats/'.format(num = year)
-        location = ''.join([directory, dates[a]])
-        rf = pd.read_csv(location, index_col=0)
+        rf = pd.read_csv(f"output/{year}/Seasonal Stats/{dates[a]}", index_col=0)
         mins = rf['Mins'].to_numpy()
         gp   = rf['GP'].to_numpy()
         ppm  = rf['PPM'].to_numpy()
@@ -97,7 +95,7 @@ def lr_test(year, gp_weights):
             sim.append(player_metric)
 
         rf['SIM'] = sim
-        rf.to_csv(location)
+        rf.to_csv(f"output/{year}/Seasonal Stats/{dates[a]}")
 
 
     data = create_inputs()
@@ -132,7 +130,7 @@ def lr_test(year, gp_weights):
         else:
             final_inputs = partial_inputs
 
-    final_inputs.to_csv('output/{num}/LR Final Inputs.csv'.format(num = year))
+    final_inputs.to_csv(f"output/{year}/LR Final Inputs.csv")
 
     X = final_inputs.drop(['Date', 'Home', 'Away', 'Home Points', 'Away Points', 'Actual Result', 'CS Result'], axis = 1)
     y = final_inputs['Actual Result']
@@ -181,7 +179,7 @@ def lr_test(year, gp_weights):
     results = pd.DataFrame(data = [accuracy, cs_accuracy]).T
 
     results.columns = ['Model', 'CS']
-    results.to_csv('output/{num}/LR Test Results/Accuracy.csv'.format(num = year))
+    results.to_csv(f"output/{year}/LR Test Results/Accuracy.csv")
 
     return results
 

@@ -18,8 +18,8 @@ def seasonal_stats(year):
     San Antonio Spurs, but his stats are listed under Toronto. He was traded while injured in Toronto
     and did not appear in any games while a member of SAS. This will be cleaned up eventually.
     '''
-    traditional = pd.read_csv('output/{num}/Traditional{num}.csv'.format(num = year), index_col = 0)
-    advanced = pd.read_csv('output/{num}/Advanced{num}.csv'.format(num = year), index_col = 0)
+    traditional = pd.read_csv(f"output/{year}/Traditional{year}.csv", index_col = 0)
+    advanced = pd.read_csv(f"output/{year}/Advanced{year}.csv", index_col = 0)
     players = traditional['Name'].unique()
     
     for i in range(len(players)):
@@ -93,14 +93,14 @@ def seasonal_stats(year):
             season_stats = season_stats.T
             season_stats.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'TOV', 'AST/TO', 'STL', 'BLK', 'EFG%', 'TS%', 'OFFRTG', 'DEFRTG', 'NETRTG', 'PF', 'Plusminus', 'PIE']
 
-    season_stats.to_csv('output/{num}/Season_Stats{num}.csv'.format(num = year))    
+    season_stats.to_csv(f"output/{year}/Season_Stats{year}.csv")    
     return season_stats
 
 #%%
 def partial_seasonal_stats(year):
     
-    traditional = pd.read_csv('output/{num}/Traditional{num}.csv'.format(num = year), index_col = 0)
-    advanced    = pd.read_csv('output/{num}/Advanced{num}.csv'.format(num = year), index_col = 0)
+    traditional = pd.read_csv(f"output/{year}/Traditional{year}.csv", index_col = 0)
+    advanced    = pd.read_csv(f"output/{year}/Advanced{year}.csv", index_col = 0)
     dates = traditional['Date'].unique()
     # Use first 20% of games to normalize stats
     dates = dates[0:132] 
@@ -175,7 +175,7 @@ def daily_seasonal_stats(advanced, traditional, date, year):
         season.append((guy['PF'].sum()/GP))
         season.append((guy['Plusminus'].sum()))
         #Calculate season Player Impact Estimator
-        stat = guy_a['PIE'].to_numpy()
+        stat = guy_a['SIE'].to_numpy()
         stat = stat*ratios
         num  = sum(stat)
         season.append(num)
@@ -197,8 +197,8 @@ def daily_seasonal_stats(advanced, traditional, date, year):
         date[0] = date[0].replace('0', '')
     if date[1][0] == '0':
         date[1] = date[1].replace('0', '')
-    location = 'output/{num}/Seasonal Stats/{zero}_{one}_{two}.csv'.format(num = year, zero = date[0], one = date[1], two = date[2])    
-    season_stats.to_csv(location)
+        
+    season_stats.to_csv(f"output/{year}/Seasonal Stats/{date[0]}_{date[1]}_{date[2]}.csv")
 
     return True
 

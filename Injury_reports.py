@@ -17,27 +17,25 @@ def injury_df(year):
     """
     """
     #you need advanced.csv and schedule.csv to run this function
-    file_names = pdf_names()
-    schedule = pd.read_csv('output/{num}/Schedule{num}.csv'.format(num = year), index_col=0)
-    not_injured = pd.read_csv('output/{num}/Traditional{num}.csv'.format(num = year), index_col=0)
+    file_names = pdf_names(year)
+    schedule = pd.read_csv(f"output/{year}/Schedule{year}.csv", index_col=0)
+    not_injured = pd.read_csv(f"output/{year}/Traditional{year}.csv", index_col=0)
 
     for i in tqdm(range(len(file_names))):
         date = file_names[i].replace('_', '/').replace('.pdf', '')
         day = schedule[schedule['Date'] == date]
         day_teams = list(day['Team'].unique()) + list(day['Opponent'].unique())
         
-        path = 'output/{num}/Injury Reports/'.format(num = year)
-        path = ''.join([path, file_names[i]])
-        reader = PdfReader(path)
+        reader = PdfReader(f"output/{year}/Injury Reports/{file_names[i]}")
         len(reader.pages)
         inactives = []
         for a in range(len(reader.pages)):
             text = reader.pages[a].extract_text()
 
-            with open("output/{num}/Inactives{num}.txt".format(num = year), 'w') as file:
+            with open(f"output/{year}/Inactives{year}.txt", 'w') as file:
                 file.write(text)
 
-            temp = open('output/{num}/Inactives{num}.txt')
+            temp = open(f"output/{year}/Inactives{year}.txt")
             temp = temp.read()
             temp = temp.split("\n")
 
@@ -455,7 +453,7 @@ def injury_df(year):
         else:
             new_injury_data = temp
 
-    new_injury_data.to_csv('output/{num}/Injury_Data{num}.csv')    
+    new_injury_data.to_csv(f"output/{year}/Injury_Data{year}.csv")    
     return new_injury_data
 
 #%%
@@ -466,7 +464,7 @@ def pdf_names(year):
     downloaded PDF.  These names are used to reference each saved
     PDF.
     """
-    schedule  = pd.read_csv('output/{num}/Schedule{num}.csv'.format(num = year), index_col = 0)
+    schedule  = pd.read_csv(f"output/{year}/Schedule{year}.csv", index_col = 0)
     file_names = schedule['Date'].unique()
 
     for i in range(len(file_names)):
@@ -481,14 +479,12 @@ def pdf_download(year):
     This downloads all the box score pdfs from the NBA for the 2022-2023 Season. 
     May need to create a function to be more selective on which pdfs to get in the future.
     """
-    links = pdf_links()
-    file_names = pdf_names()
+    links = pdf_links(year)
+    file_names = pdf_names(year)
 
     for i in tqdm(range(len(links))):
-        direct = 'output/{num}/Injury Reports/'.format(num = year)
         response = requests.get(links[i])
-        direct = ''.join([direct, file_names[i]])
-        with open(direct, 'wb') as f:
+        with open(f"output/{year}/Injury Reports/{file_names[i]}", 'wb') as f:
             f.write(response.content)
 
 def pdf_links(year):
@@ -496,7 +492,7 @@ def pdf_links(year):
     This function creates the links that will then be used to
     download the needed PDF files locally.
     """
-    schedule  = pd.read_csv('output/{num}/Schedule{num}.csv'.format(num = year), index_col = 0)
+    schedule  = pd.read_csv(f"output/{year}/Schedule{year}.csv", index_col = 0)
     date = schedule['Date'].unique()
 
     for i in range(len(date)):
@@ -507,8 +503,7 @@ def pdf_links(year):
     links = []
 
     for i in range(len(date)):
-        link = "https://ak-static.cms.nba.com/referee/injury/Injury-Report_{day}{suffix}".format(day = date[i], suffix = '_09PM.pdf')
-        links.append(link)
+        links.append(f"https://ak-static.cms.nba.com/referee/injury/Injury-Report_{date[i]}_09PM.pdf")
     
     return links
 
@@ -533,16 +528,14 @@ def injury_DNP(year):
     file_names = old_pdf_names(year)
 
     for i in tqdm(range(len(file_names))):
-        path = 'output/{num}/Box Scores/{name}'.format(num = year, name = file_names[i])
-
-        reader = PdfReader(path)
+        reader = PdfReader(f"output/{year}/Box Scores/{file_names[i]}")
         page = reader.pages[0]
         text = page.extract_text()
 
-        with open("output/{num}/Inactives{num}.txt".format(num = year), 'w') as file:
+        with open(f"output/{year}/Inactives{year}.txt", 'w') as file:
             file.write(text)
 
-        inactives = open('output/{num}/Inactives{num}.txt'.format(num = year))
+        inactives = open(f"output/{year}/Inactives{year}.txt")
         inactives = inactives.read()
         inactives = inactives.split("\n")
 
@@ -631,8 +624,8 @@ def injury_DNP(year):
             injury_home[0] = ' - '.join([injury_home[0][1], injury_home[0][2]])#Removes "Inactive: teamname - "
 
         #Add team name, date to each element
-        away, home = name[9:12], name[12:15]
-        year, month, day = name[0:4], name[4:6], name[6:8]
+        away, home = file_names[i][9:12], file_names[i][12:15]
+        year, month, day = file_names[i][0:4], file_names[i][4:6], file_names[i][6:8]
         date = '/'.join([month, day, year])
         for k in range(len(injury_away)):
             injury_away[k] = " = ".join([away, injury_away[k]])
@@ -662,12 +655,12 @@ def injury_DNP(year):
 
     injury_data = injury_data.dropna()
     injury_data = pd.concat([injury_data[injury_data['Injury'].str.contains('DNP')] , injury_data[injury_data['Injury'].str.contains('DND')]], ignore_index=True)
-    injury_data.to_csv('output/{num}/DNP{num}.csv')    
+    injury_data.to_csv(f"output/{year}/DNP{year}.csv")    
     return injury_data
 
 def old_pdf_names(date, home, away):
     """
-    This fucntion pulls the matchups from the schedule2223.csv
+    This fucntion pulls the matchups from the schedule2023.csv
     file and dates of those matchups to create the names of each 
     downloaded PDF.  These names are used to reference each saved
     PDF.
@@ -679,8 +672,7 @@ def old_pdf_names(date, home, away):
         day = "".join([day[2], day[0], day[1]])
         date[i] = day
 
-        name = "{day}_{away}{home}.pdf".format(day = date[i], away = away[i], home = home[i])
-        file_names.append(name)
+        file_names.append(f"{date[i]}_{away[i]}{home[i]}")
 
     return file_names
 
@@ -693,10 +685,8 @@ def old_pdf_download(year):
     file_names = old_pdf_names(date, home, away)
 
     for i in range(len(links)):
-        direct = 'output/{num}/Box Scores/{file}'.format(num = year, file = file_names[i])
-        direct = ''.join([direct, file_names[i]])
         response = requests.get(links[i])
-        with open(direct, 'wb') as f:
+        with open(f"output/{year}/Box Scores/{file_names[i]}", 'wb') as f:
             f.write(response.content)
 
 def old_pdf_links(year):
@@ -704,7 +694,7 @@ def old_pdf_links(year):
     This function creates the links that will then be used to
     download the needed PDF files locally.
     """
-    schedule  = pd.read_csv('output/{num}/Schedule{num}.csv'.format(num = year), index_col = 0)
+    schedule  = pd.read_csv(f"output/{year}/Schedule{year}.csv", index_col = 0)
     date = schedule['Date'].to_numpy()
     home = schedule['Team'].to_numpy()
     away = schedule['Opponent'].to_numpy()
@@ -717,8 +707,7 @@ def old_pdf_links(year):
     links = []
 
     for i in range(len(date)):
-        link = "https://statsdmz.nba.com/pdfs/{date}/{date}_{away}{home}.pdf".format(date = date[i], away = away[i], home = home[i])
-        links.append(link)
+        links.append(f"https://statsdmz.nba.com/pdfs/{date[i]}/{date[i]}_{away[i]}{home[i]}.pdf")
     
     return links, date, home, away
 

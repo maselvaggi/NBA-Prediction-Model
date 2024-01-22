@@ -5,13 +5,13 @@ from tqdm import tqdm
 
 #%%
 def create_active_rosters(year):
-    players_in  = pd.read_csv('output/{num}/Traditional{num}.csv'.format(num = year), index_col=0)
+    players_in  = pd.read_csv(f"output/{year}/Traditional{year}.csv", index_col=0)
     players_in  = players_in[['Date', 'Team', 'Name']]
-    players_out = pd.read_csv('output/{num}/Injury_Data{num}.csv'.format(num = year), index_col = 0) #works by not including the index_col = 0 only, no clue as to why
+    players_out = pd.read_csv(f"output/{year}/Injury_Data{year}.csv'", index_col = 0) #works by not including the index_col = 0 only, no clue as to why
     players_out = players_out[['Date', 'Team', 'Name']]
-    players_dnp = pd.read_csv('output/{num}/DNP{num}.csv', index_col=0)
+    players_dnp = pd.read_csv(f"output/{year}/DNP{year}.csv", index_col=0)
     players_dnp = players_dnp[['Date', 'Team', 'Name']]
-    schedule = pd.read_csv('output/{num}/Schedule{num}}.csv'.format(num = year), index_col=0)
+    schedule = pd.read_csv(f"output/{year}/Schedule{year}.csv'", index_col=0)
 
     dates = schedule['Date'].unique()
 
@@ -37,8 +37,7 @@ def create_active_rosters(year):
         
         active_roster = active_roster.drop_duplicates()
         date = dates[i].replace('/', '_')
-        date = ''.join([date, '.csv'])
-        active_roster.to_csv('output/{num}/Active Rosters/{day}.csv'.format(num = year, day = date))
+        active_roster.to_csv(f"output/{year}/Active Rosters/{date}.csv")
 
 
     return active_roster

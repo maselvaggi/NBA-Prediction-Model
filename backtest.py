@@ -5,15 +5,20 @@ from formula import *
 from tqdm import tqdm
 
 
+
 # %%
 def backtest(year):
-    schedule = pd.read_csv('output/{num}/Schedule{num}}.csv'.format(num = year), index_col = 0)
-    rotations= pd.read_csv('output/{num}/Rotations{num}.csv'.format(num = year), index_col = 0)
-    matchups = pd.read_csv('output/{num}/Caesars_Lines{num}.csv'.format(num = year), index_col=0)
+    """
+    This file is not in use.
+    
+    """
+    schedule = pd.read_csv(f"output/{year}/Schedule{year}.csv", index_col = 0)
+    rotations= pd.read_csv(f"output/{year}/Rotations{year}.csv", index_col = 0)
+    matchups = pd.read_csv(f"output/{year}/Caesars_Lines{year}.csv", index_col=0)
     day      = matchups[matchups['Date'] == '11/20/2022'].index
     matchups = matchups.iloc[day[0]:]
-    injuries = pd.read_csv('output/{num}/Injury_Data{num}.csv'.format(num = year), index_col = 0)
-    directory = 'output/{num}/Model Predictions'.format(num = year)
+    injuries = pd.read_csv(f"output/{year}/Injury_Data{year}.csv", index_col = 0)
+    directory = f"output/{year}/Model Predictions"
 
     for i in tqdm(range(len(matchups))): #len(matchups))):
         caesars_favorite, caesars_spread = matchups['Favorite'].iloc[i], matchups['Spread'].iloc[i]
@@ -80,7 +85,7 @@ def backtest(year):
             final_lines.to_csv(location)
 
 
-    final_lines.to_csv('output/{num}/Model Predictions{num}.csv'.format(num = year))
+    final_lines.to_csv(f"output/{year}/Model Predictions{year}.csv")
     return final_lines
 #%%
 formula_predictions = backtest()

@@ -11,15 +11,15 @@ def create_schedule(year):
     NBA.com and doing some data cleaning on the text.  
     """
     # Need advanced.csv in order to create schedule.csv
-    schedule = pd.read_csv('output/{num}/Advanced{num}.csv'.format(num = year), index_col = 0)
+    schedule = pd.read_csv(f"output/{year}/Advanced{year}.csv", index_col = 0)
 
     schedule = schedule[['Date','Team', 'Location', 'Opponent', 'Result']]
     schedule = schedule.drop_duplicates()
     schedule = schedule[schedule['Location'] == "H"]
     schedule = schedule.reset_index(drop=True)
     
-    schedule.to_csv('output/{num}/Schedule{num}.csv'.format(num = year))
-    schedule = pd.read_csv('output/{num}/Schedule{num}.csv'.format(num = year), index_col=0)
+    schedule.to_csv(f"output/{year}/Schedule{year}.csv")
+    schedule = pd.read_csv(f"output/{year}/Schedule{year}.csv", index_col=0)
     
     return schedule
 

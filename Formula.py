@@ -209,7 +209,7 @@ def matchup(year, home, away, date, schedule, rotations, injuries):
 
     cleaned_date = date.replace('/', '_')
     cleaned_date = ''.join([cleaned_date,'.csv'])
-    directory = 'output/{num}/Seasonal Stats/'.format(num = year)
+    directory = f'output/{year}/Seasonal Stats/'
     location = ''.join([directory, cleaned_date])
     season_stats = pd.read_csv(location, index_col=0)
 

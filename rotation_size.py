@@ -22,7 +22,7 @@ def get_team_rotations(year):
     Last, we round off the rotation size and save that as a .csv file 
     to be used as an input when running the model.  
     """
-    box_scores = pd.read_csv('output/{num}/Advanced{num}.csv'.format(num = year), index_col=0)
+    box_scores = pd.read_csv(f"output/{year}/Advanced{year}.csv", index_col=0)
     box_scores['Date'] = pd.to_datetime(box_scores['Date'], format = '%m/%d/%Y')
     box_scores = box_scores.sort_values(by = ['Date'], ascending = True)
     teams = box_scores['Team'].unique()
@@ -66,12 +66,9 @@ def get_team_rotations(year):
     rotations = pd.concat([ten_games, sma])
 
     model_rotations = round(rotations)
-    model_rotations.to_csv('output/{num}/Rotations{num}.csv'.format(num = year))
+    model_rotations.to_csv(f"output/{year}/Rotations{year}.csv")
 
     return model_rotations
-# %%
-rotations = get_team_rotations('2023')
-
 #%%
 if __name__ == "__main__":
     get_team_rotations()

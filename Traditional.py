@@ -48,7 +48,7 @@ def scrape_all_traditional_stats(year):
         
     driver.quit()
     
-    with open('output/{num}/NewTraditionalStats{num}.txt'.format(num = year), 'w') as file:
+    with open(f'output/{year}/NewTraditionalStats{year}.txt', 'w') as file:
         for row in tables:
             s = "".join(map(str, row))
             file.write(s+'\n')
@@ -63,7 +63,7 @@ def scrape_all_traditional_stats(year):
     df_T[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus' ]] = df_T[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']].apply(pd.to_numeric) 
     df_T[['FG%', '3P%', 'FT%']] = df_T[['FG%', '3P%', 'FT%']].astype(float)
     
-    df_T.to_csv('output/{num}/Traditional{num}.csv'.format(num = year))
+    df_T.to_csv(f'output/{year}/Traditional{year}.csv')
 
 
     return df_T
@@ -149,7 +149,7 @@ def scrape_new_traditional_stats(year, pages):
         
     driver.quit()
     
-    with open("output/{num}/NewTraditionalStats{num}.txt".format(num = year), 'w') as file:
+    with open(f"output/{year}/NewTraditionalStats{year}.txt", 'w') as file:
         for row in tables:
             s = "".join(map(str, row))
             file.write(s+'\n')
@@ -164,7 +164,7 @@ def scrape_new_traditional_stats(year, pages):
     df_T_new[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus' ]] = df_T_new[['Mins', 'Points', 'FGM','FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV','PF', 'Plusminus']].apply(pd.to_numeric) 
     df_T_new[['FG%', '3P%', 'FT%']] = df_T_new[['FG%', '3P%', 'FT%']].astype(float)
     
-    traditional_old = pd.read_csv("output/{num}/Traditional{num}.csv".format(num = year))
+    traditional_old = pd.read_csv(f"output/{year}/Traditional{year}.csv")
     traditional = pd.concat([df_T_new, traditional_old], ignore_index=True, sort=False)
     traditional = traditional[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'Points',
                                'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%','FTM', 'FTA', 'FT%', 'OREB', 'DREB',
@@ -175,13 +175,13 @@ def scrape_new_traditional_stats(year, pages):
                                'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%','FTM', 'FTA', 'FT%', 'OREB', 'DREB', 
                                'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']]
     traditional = remove_duplicates(traditional)
-    traditional.to_csv('output/{num}/Traditional{num}.csv'.format(num = year))
+    traditional.to_csv(f"output/{year}/Traditional{year}.csv")
     
     return traditional    
 
 def clean_new_traditional_stats(year):
     
-    traditional = open('output/{num}/NewTraditionalStats{num}.txt'.format(num = year))
+    traditional = open(f"'output/{year}/NewTraditionalStats{year}.txt")
     traditional = traditional.read()
     T_game_logs = traditional.split("\n")
     T_game_logs.pop()
@@ -208,10 +208,10 @@ def update_traditional_stats(trad_year, trad_pages, all_trad_pages):
             all_traditional_stats = scrape_all_traditional_stats(trad_year)
             all_added_entries = len(all_traditional_stats)
 
-            return "All traditional stats were collected. \n {num} entries were collected.".format(num = all_added_entries)
+            return f"All traditional stats were collected. \n{all_added_entries} entries were collected."
         else:
-            if os.path.exists('output/{num}/Traditional{num}.csv'.format(num = trad_year)):
-                old_traditional_stats = pd.read_csv('output/{num}/Traditional{num}.csv'.format(num = trad_year))
+            if os.path.exists(f"output/{trad_year}/Traditional{trad_year}.csv"):
+                old_traditional_stats = pd.read_csv(f"output/{trad_year}/Traditional{trad_year}.csv")
                 old_traditional_stats = len(old_traditional_stats)
 
                 new_traditional_stats = scrape_new_traditional_stats(trad_year, trad_pages)
@@ -219,14 +219,14 @@ def update_traditional_stats(trad_year, trad_pages, all_trad_pages):
                 updated_trad_entries  = new_traditional_stats - old_traditional_stats
 
                 if updated_trad_entries > 0:
-                    return "Traditional stats file has been updated.\n{num} entries were added to the traditional stats .csv file.".format(num = updated_trad_entries)
+                    return f"Traditional stats file has been updated.\n{updated_trad_entries} entries were added to the traditional stats .csv file."
                 else:
                     return "Traditional stats file was not updated, no new entries to add."
             else:
                 all_traditional_stats = scrape_all_traditional_stats(trad_year)
                 all_added_entries = len(all_traditional_stats)
 
-                return "All traditional stats have been collected.\n{num} entries were collected.".format(num = all_added_entries)
+                return f"All traditional stats have been collected.\n{all_added_entries} entries were collected."
                 
     else:
         return "No new traditional stats were collected."
