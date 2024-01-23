@@ -40,12 +40,13 @@ def update_espn_game_info(year, get_all_espn_game_info):
 
 def get_2023_game_ids(link, headers, get_all_espn_game_info):
     new_game_info = []
+    game_information = []
     if get_all_espn_game_info is False and os.path.exists('output/2023/ESPN_game_info2023.csv') is True:
         collected_game_ids = pd.read_csv('output/2023/ESPN_game_info2023.csv', index_col=0)
         max_game_id = collected_game_ids['Game ID'].max()
 
-        if max_game_id != 401469385:
-            for game in range(max_game_id+1, 401469385+1):
+        if max_game_id != 401469385 or len(collected_game_ids) != 1230:
+            for game in tqdm(range(max_game_id+1, 401469385+1)):
                 if game != 401468924:
                     url = ''.join([link, str(game)])
                     record = requests.get(url, headers = headers)
@@ -175,8 +176,6 @@ def get_game_info(game_id):
 
     Next, it cleans the dates in order to be uniform with the dates in all
     other files.
-
-    Last, it creates a dataframe and .csv file.
     '''
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.111 Safari/537.36'}
 

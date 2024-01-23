@@ -181,7 +181,7 @@ def scrape_new_traditional_stats(year, pages):
 
 def clean_new_traditional_stats(year):
     
-    traditional = open(f"'output/{year}/NewTraditionalStats{year}.txt")
+    traditional = open(f"output/{year}/NewTraditionalStats{year}.txt")
     traditional = traditional.read()
     T_game_logs = traditional.split("\n")
     T_game_logs.pop()
