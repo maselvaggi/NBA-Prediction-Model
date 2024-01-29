@@ -125,7 +125,7 @@ def get_2024_game_ids(link, headers, get_all_espn_game_info):
                 all_game_info = pd.concat([collected_game_ids, game_information], ignore_index=True)
                 all_game_info['Attendance'] = all_game_info['Attendance'].astype(str)
                 all_game_info = all_game_info[~all_game_info['Attendance'].str.contains('\[]')]
-                #all_game_info = all_game_info.drop_duplicates()
+                all_game_info = all_game_info.replace('SASC', 'SAC').replace('<', '')
                 all_game_info.to_csv('output/2024/ESPN_game_info2024.csv')  
                 entries_added = len(all_game_info) - len(collected_game_ids)
 
@@ -145,7 +145,7 @@ def get_2024_game_ids(link, headers, get_all_espn_game_info):
             record = requests.get(url, headers = headers)
             if record.status_code == 200:
                 try:
-                    if game != max_game_id+1:
+                    if game != 401584689:
                         new_game_info = get_game_info(game)
                         new_game_info = pd.DataFrame(new_game_info).T
                         new_game_info.columns =  ['Date', 'Home', 'Away', 'Favorite', 'Spread', 'O/U','Attendance', 'Capacity', 'Game ID']
@@ -156,17 +156,17 @@ def get_2024_game_ids(link, headers, get_all_espn_game_info):
                         game_information.columns = ['Date', 'Home', 'Away', 'Favorite', 'Spread', 'O/U','Attendance', 'Capacity', 'Game ID']
 
                 except IndexError:
-                    entries_added = (game-1) - max_game_id
-                    if entries_added > 1:
-                        print(f'There was information gathered for {entries_added} games.')
-                    elif entries_added == 1:
-                        print('There was information gathered for 1 game.')
+                    if len(game_information) > 1:
+                        game_information.to_csv('output/2024/ESPN_game_info2024.csv') 
+                        return f"There was information gathered for {len(game_information)} games."
+                    elif len(game_information) == 1:
+                        game_information.to_csv('output/2024/ESPN_game_info2024.csv') 
+                        return 'There was information gathered for 1 game.'
                     else:
                         return "There was no game information collected. The file is up to date."
-                    break
+                    
 
         game_information.to_csv('output/2024/ESPN_game_info2024.csv') 
-    
         return f"All available game information was successfully collected.\n{len(new_game_info)} entries were collected."
 
 def get_game_info(game_id):
@@ -207,6 +207,12 @@ def get_game_info(game_id):
     date = date.replace('[<div class="n8 GameInfo__Meta"><span>', '').replace('<!-- -->, <!-- -->', '=').replace('</span><span>Coverage<!-- -->: <!-- -->', '=').replace('</span></div>]','')
     date = date.split('=')
     date = date[1]   
+    date = date.replace('October','10').replace('November','11').replace('December','12')
+    date = date.replace('January','01').replace('February','02').replace('March','03')
+    date = date.replace('April','04').replace(', ', '/').replace(' ', '/') 
+    date = date.split('/')
+    date = f"{date[2]}-{date[0]}-{date[1]}"
+
 
     attendance = soup.find_all('div', attrs={'class':'Attendance__Numbers'})
     attendance = str(attendance)
@@ -228,11 +234,10 @@ def get_game_info(game_id):
 
     info = '='.join([date, away_team, home_team, favorite, spread, over_under, attendance, capacity, str(game_id)])
     info = info.replace('WSH', 'WAS').replace('SASC','SAC').replace('SA','SAS').replace('SA<','SAS').replace('NY','NYK').replace('NY<','NYK').replace('NO','NOP').replace('NOP<','NOP').replace('NO<','NOP').replace('GS','GSW').replace('GS<','GSW').replace('UTAH','UTA')
-    info = info.replace('October','10').replace(', ', '/').replace(' ', '/').replace('November','11').replace(', ', '/').replace(' ', '/').replace('December','12').replace(', ', '/').replace(' ', '/')
-    info = info.replace('January','01').replace(', ', '/').replace(' ', '/').replace('February','02').replace(', ', '/').replace(' ', '/').replace('March','03').replace(', ', '/').replace(' ', '/')
-    info = info.replace('April','04').replace(', ', '/').replace(' ', '/') 
-    info = info.split('=')  
-    
+    info = info.split('=')
+      
+    info[2] = info[2].replace('<', '')
+    info[3] = info[3].replace('<', '')
 
     return info
 
