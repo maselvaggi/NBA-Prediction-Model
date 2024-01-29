@@ -1,6 +1,10 @@
 # NBA-Prediction-Model
 Welcome to my NBA Prediction Model!
 
-This model is a proof of concept.  All data acquired was web scraped/downloaded with the Advanced.py, Traditional.py, Caesars_Odds.py, injury_reports.py scripts.
+This model is a proof of concept and a passion project of mine.  This model will evolve dramatically over time.  
 
-The model was initially a simple statistical model with an accuracy rate of ~59.50%.  After utilizing machine learning models, the accuracy rate reached ~64.47% using a logistic regression.
+The model in its current form is not user friendly to run.  I am currently building out code to make running this model easier to run.  
+
+2022-2023 NBA Regular Season Results:
+Before leveraging machine learning models the accuracy rate was ~59.50%.  
+After utilizing machine learning models, the accuracy rate reached ~64.47% using logistic regression.
