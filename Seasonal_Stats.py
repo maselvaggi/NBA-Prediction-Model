@@ -1,6 +1,8 @@
 #%%
+import os.path
 import pandas as pd
 import numpy as np
+np.seterr(divide='ignore', invalid='ignore') #avoid: invalid value encountered in scalar divide
 from tqdm import tqdm
 
 # %%
@@ -12,7 +14,7 @@ def seasonal_stats(year):
     
     There is one issue with the accuracy of labeling the corect team of the player.  
     If the player played for one team, then got traded to another but did not play a 
-    game for that team due to injury- his old team will still be listed, ex. Khem Birch. 
+    game for that team due to injury- his old team will still be listed, ex. Khem Birch 2022-2023. 
 
     The 'Team' column is based on the last team for which a player played in a game.  Birch is on the
     San Antonio Spurs, but his stats are listed under Toronto. He was traded while injured in Toronto
@@ -96,28 +98,6 @@ def seasonal_stats(year):
     season_stats.to_csv(f"output/{year}/Season_Stats{year}.csv")    
     return season_stats
 
-#%%
-def partial_seasonal_stats(year):
-    
-    traditional = pd.read_csv(f"output/{year}/Traditional{year}.csv", index_col = 0)
-    advanced    = pd.read_csv(f"output/{year}/Advanced{year}.csv", index_col = 0)
-    dates = traditional['Date'].unique()
-    # Use first 20% of games to normalize stats
-    dates = dates[0:132] 
-
-    for i in tqdm(range(len(dates))):
-        trad = traditional
-        tstats = trad[trad['Date'] == dates[i]].index
-        trad = trad.iloc[tstats[-1]+1:]
-
-        adv = advanced
-        astats = advanced[advanced['Date'] == dates[i]].index
-        adv = adv.iloc[astats[-1]+1:]
-
-        daily_seasonal_stats(adv, trad, dates[i])
-
-    return True
-    
 def daily_seasonal_stats(advanced, traditional, date, year):
     players = traditional['Name'].unique()
     
@@ -175,7 +155,7 @@ def daily_seasonal_stats(advanced, traditional, date, year):
         season.append((guy['PF'].sum()/GP))
         season.append((guy['Plusminus'].sum()))
         #Calculate season Player Impact Estimator
-        stat = guy_a['SIE'].to_numpy()
+        stat = guy_a['PIE'].to_numpy()
         stat = stat*ratios
         num  = sum(stat)
         season.append(num)
@@ -191,19 +171,37 @@ def daily_seasonal_stats(advanced, traditional, date, year):
             season_stats = pd.DataFrame(season)
             season_stats = season_stats.T
             season_stats.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'TOV', 'AST/TO', 'STL', 'BLK', 'EFG%', 'TS%', 'OFFRTG', 'DEFRTG', 'NETRTG', 'PF', 'Plusminus', 'PIE']
-    
-    date = date.split('/')
-    if date[0][0] == '0':
-        date[0] = date[0].replace('0', '')
-    if date[1][0] == '0':
-        date[1] = date[1].replace('0', '')
         
-    season_stats.to_csv(f"output/{year}/Seasonal Stats/{date[0]}_{date[1]}_{date[2]}.csv")
+    season_stats.to_csv(f"output/{year}/Seasonal Stats/{date}.csv")
 
     return True
+
+def update_seasonal_stats(year, get_everything):
+    if year == 0:
+        return "There were no updates made to the seasonal stats files."
+    files_updated = 0
+    traditional = pd.read_csv(f"output/{year}/Traditional{year}.csv", index_col = 0)
+    advanced    = pd.read_csv(f"output/{year}/Advanced{year}.csv", index_col = 0)
+    dates = advanced['Date'].unique()
+
+    for i in tqdm(range(2, len(dates))):
+        if os.path.exists(f"output/{year}/Seasonal Stats/{dates[-i]}.csv") and get_everything is False:
+            pass
+        else:
+            #grab all data up to but not including the date selected.
+            trad_marker = traditional[traditional['Date'] == dates[-i]].index
+            partial_traditional_stats = traditional.iloc[trad_marker[-1]+1:]
+
+            adv_marker = advanced[advanced['Date'] == dates[-i]].index
+            partial_advanced_stats = advanced.iloc[adv_marker[-1]+1:]
+            daily_seasonal_stats(partial_advanced_stats, partial_traditional_stats, dates[-i], year)
+
+            files_updated += 1
+
+    return f"There were {files_updated} files updated in the {year} Season Stats Folder."
 
 #%%
 if __name__ == "__main__":
     seasonal_stats()
-    partial_seasonal_stats()
     daily_seasonal_stats()
+    update_seasonal_stats()
