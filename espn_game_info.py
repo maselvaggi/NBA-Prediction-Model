@@ -125,12 +125,13 @@ def get_2024_game_ids(link, headers, get_all_espn_game_info):
                 all_game_info = pd.concat([collected_game_ids, game_information], ignore_index=True)
                 all_game_info['Attendance'] = all_game_info['Attendance'].astype(str)
                 all_game_info = all_game_info[~all_game_info['Attendance'].str.contains('\[]')]
-                all_game_info = all_game_info.replace('SASC', 'SAC').replace('<', '')
+                all_game_info = all_game_info.replace('SASC', 'SAC').replace('SAS<', 'SAS').replace('NYK<', 'NYK')
+                all_game_info = all_game_info.replace('MOP<', 'NOP').replace('GSW<', 'GSW')
                 all_game_info.to_csv('output/2024/ESPN_game_info2024.csv')  
                 entries_added = len(all_game_info) - len(collected_game_ids)
 
 
-                return f"All available game info was collected for {entries_added} games."
+                return f"{entries_added} games were added to the 2024 ESPN game info csv."
 
         else:
             print('print this')
@@ -233,11 +234,8 @@ def get_game_info(game_id):
     home_team = teams[2][0:3]
 
     info = '='.join([date, away_team, home_team, favorite, spread, over_under, attendance, capacity, str(game_id)])
-    info = info.replace('WSH', 'WAS').replace('SASC','SAC').replace('SA','SAS').replace('SA<','SAS').replace('NY','NYK').replace('NY<','NYK').replace('NO','NOP').replace('NOP<','NOP').replace('NO<','NOP').replace('GS','GSW').replace('GS<','GSW').replace('UTAH','UTA')
+    info = info.replace('WSH', 'WAS').replace('SASC','SAC').replace('SA','SAS').replace('NY','NYK').replace('NO','NOP').replace('NO<','NOP').replace('GS','GSW').replace('UTAH','UTA')
     info = info.split('=')
-      
-    info[2] = info[2].replace('<', '')
-    info[3] = info[3].replace('<', '')
 
     return info
 
