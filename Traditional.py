@@ -62,6 +62,17 @@ def scrape_all_traditional_stats(year):
     
     df_T[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus' ]] = df_T[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']].apply(pd.to_numeric) 
     df_T[['FG%', '3P%', 'FT%']] = df_T[['FG%', '3P%', 'FT%']].astype(float)
+
+    unique_trad_dates = traditional['Date'].unique()
+    for i in range(len(unique_trad_dates)):
+        if "/" not in unique_trad_dates[i]:
+            pass
+        else:
+            fix_this_date = unique_trad_dates[i]
+            fix_this_date = fix_this_date.split('/')
+            fixed_date = f"{fix_this_date[2]}-{fix_this_date[0]}-{fix_this_date[1]}"
+
+            traditional = traditional.replace(unique_trad_dates[i], fixed_date)
     
     df_T.to_csv(f'output/{year}/Traditional{year}.csv')
 
@@ -188,7 +199,7 @@ def scrape_new_traditional_stats(year, pages):
             traditional = traditional.replace(unique_trad_dates[i], fixed_date)
 
     traditional.to_csv(f"output/{year}/Traditional{year}.csv")
-    
+
     return traditional    
 
 def clean_new_traditional_stats(year):
