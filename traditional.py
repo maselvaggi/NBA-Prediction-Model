@@ -63,7 +63,7 @@ def scrape_all_traditional_stats(year):
     df_T[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus' ]] = df_T[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']].apply(pd.to_numeric) 
     df_T[['FG%', '3P%', 'FT%']] = df_T[['FG%', '3P%', 'FT%']].astype(float)
 
-    unique_trad_dates = traditional['Date'].unique()
+    unique_trad_dates = df_T['Date'].unique()
     for i in range(len(unique_trad_dates)):
         if "/" not in unique_trad_dates[i]:
             pass
@@ -72,7 +72,7 @@ def scrape_all_traditional_stats(year):
             fix_this_date = fix_this_date.split('/')
             fixed_date = f"{fix_this_date[2]}-{fix_this_date[0]}-{fix_this_date[1]}"
 
-            traditional = traditional.replace(unique_trad_dates[i], fixed_date)
+            df_T = df_T.replace(unique_trad_dates[i], fixed_date)
     
     df_T.to_csv(f'output/{year}/Traditional{year}.csv')
 
@@ -180,12 +180,6 @@ def scrape_new_traditional_stats(year, pages):
     traditional = traditional[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'Points',
                                'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%','FTM', 'FTA', 'FT%', 'OREB', 'DREB',
                                'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']]
-    traditional = traditional.drop_duplicates().reset_index()
-    #keeps old indexes as column. So I'm just overwriting it in a lazy way-- look into better way
-    traditional = traditional[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'Points', 
-                               'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%','FTM', 'FTA', 'FT%', 'OREB', 'DREB', 
-                               'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']]
-    traditional = remove_duplicates(traditional)
 
     unique_trad_dates = traditional['Date'].unique()
     for i in range(len(unique_trad_dates)):
@@ -197,6 +191,14 @@ def scrape_new_traditional_stats(year, pages):
             fixed_date = f"{fix_this_date[2]}-{fix_this_date[0]}-{fix_this_date[1]}"
 
             traditional = traditional.replace(unique_trad_dates[i], fixed_date)
+
+    traditional = traditional.drop_duplicates().reset_index()
+    #keeps old indexes as column. So I'm just overwriting it in a lazy way-- look into better way
+    traditional = traditional[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'Points', 
+                               'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%','FTM', 'FTA', 'FT%', 'OREB', 'DREB', 
+                               'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']]
+    traditional = remove_duplicates(traditional)
+
 
     traditional.to_csv(f"output/{year}/Traditional{year}.csv")
 

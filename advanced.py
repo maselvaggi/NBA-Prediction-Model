@@ -61,7 +61,7 @@ def scrape_all_advanced_stats(year):
     df_A[['Mins']] = df_A[['Mins']].apply(pd.to_numeric)
     df_A[['OFFRTG', 'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']] = df_A[['OFFRTG', 'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']].astype(float)
 
-    unique_adv_dates = advanced['Date'].unique()
+    unique_adv_dates = df_A['Date'].unique()
     for i in range(len(unique_adv_dates)):
         if '/' not in unique_adv_dates[i]:
             pass
@@ -69,7 +69,7 @@ def scrape_all_advanced_stats(year):
             fix_this_date = unique_adv_dates[i]
             fix_this_date = fix_this_date.split('/')
             fixed_date = f"{fix_this_date[2]}-{fix_this_date[0]}-{fix_this_date[1]}"
-            advanced = advanced.replace(unique_adv_dates[i], fixed_date)    
+            df_A = df_A.replace(unique_adv_dates[i], fixed_date)    
     
     df_A.to_csv(f"output/{year}/Advanced{year}.csv")
     
@@ -176,11 +176,6 @@ def scrape_new_advanced_stats(year, pages):
     
     advanced_old = pd.read_csv(f"output/{year}/Advanced{year}.csv")
     advanced = pd.concat([df_A_new, advanced_old], ignore_index=True, sort=False)
-    advanced = advanced[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'OFFRTG', 'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']]
-    advanced = advanced.drop_duplicates().reset_index()
-    #keeps old indexes as column. So I'm just overwriting it in a lazy way-- look into better way
-    advanced = advanced[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'OFFRTG', 'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']]
-    advanced = remove_duplicates(advanced)
 
     unique_adv_dates = advanced['Date'].unique()
     for i in range(len(unique_adv_dates)):
@@ -191,6 +186,12 @@ def scrape_new_advanced_stats(year, pages):
             fix_this_date = fix_this_date.split('/')
             fixed_date = f"{fix_this_date[2]}-{fix_this_date[0]}-{fix_this_date[1]}"
             advanced = advanced.replace(unique_adv_dates[i], fixed_date)
+    
+    advanced = advanced[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'OFFRTG', 'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']]
+    advanced = advanced.drop_duplicates().reset_index()
+    #keeps old indexes as column. So I'm just overwriting it in a lazy way-- look into better way
+    advanced = advanced[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'OFFRTG', 'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']]
+    advanced = remove_duplicates(advanced)    
 
     advanced.to_csv(f"output/{year}/Advanced{year}.csv")
     

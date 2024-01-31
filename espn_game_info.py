@@ -19,7 +19,7 @@ def update_espn_game_info(year, get_all_espn_game_info):
     2023 Game ID range: 401468016 - 401469385
     2024 Game ID range: 401584689 - 401585828
     '''
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.111 Safari/537.36'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.86 Safari/537.36'}
 
     link = 'https://www.espn.com/nba/game/_/gameId/'
     if type(year) != int:
@@ -231,7 +231,12 @@ def get_game_info(game_id):
     teams = teams.split('/><span class="">')
 
     away_team = teams[1][0:3]
+    if away_team[2] == '<':
+        away_team = away_team[:2]
+        
     home_team = teams[2][0:3]
+    if home_team[2] == '<':
+        home_team = home_team[:2]
 
     info = '='.join([date, away_team, home_team, favorite, spread, over_under, attendance, capacity, str(game_id)])
     info = info.replace('WSH', 'WAS').replace('SASC','SAC').replace('SA','SAS').replace('NY','NYK').replace('NO','NOP').replace('NO<','NOP').replace('GS','GSW').replace('UTAH','UTA')
