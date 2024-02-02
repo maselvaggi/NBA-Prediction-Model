@@ -459,8 +459,10 @@ def get_injury_data(year):
 
 def injury_report_download(year):
     """
-    This downloads all the box score pdfs from the NBA for the 2022-2023 Season. 
-    May need to create a function to be more selective on which pdfs to get in the future.
+    This downloads all the injury report pdfs from the NBA.com for the selected year.
+
+    The input year is the latter year in the season schedule:
+    input of 2024 would correspond to the 2023-2024 season.
     """
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.86 Safari/537.36'}
 
@@ -474,8 +476,9 @@ def injury_report_download(year):
 
 def injury_report_links_and_names(year, get_only_file_names:bool = False):
     """
-    This function creates the links that will then be used to
-    download the needed PDF files locally.
+    This function creates:
+    - links that will then be used to download the needed PDF files locally.
+    - file names to save downloaded .pdfs under correct names.
     """
     schedule  = pd.read_csv(f"output/{year}/Schedule{year}.csv", index_col = 0)
     link_dates  = schedule['Date'].unique()
