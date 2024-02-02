@@ -205,7 +205,6 @@ def scrape_new_traditional_stats(year, pages):
     return traditional    
 
 def clean_new_traditional_stats(year):
-    
     traditional = open(f"output/{year}/NewTraditionalStats{year}.txt")
     traditional = traditional.read()
     T_game_logs = traditional.split("\n")
@@ -220,7 +219,6 @@ def clean_new_traditional_stats(year):
     return T_box_scores
 
 def update_traditional_stats(trad_year, trad_pages, all_trad_pages):
-
     if type(trad_year) != int or type(trad_pages) != int:
         raise ValueError("Please enter input in the form of an integer.")  
     if type(all_trad_pages) != bool:

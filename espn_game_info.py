@@ -62,7 +62,8 @@ def get_2023_game_ids(link, headers, get_all_espn_game_info):
             return "There is no 2023 game information to collect. The file is up to date."
 
         new_game_info = pd.DataFrame(new_game_info, columns=['Date', 'Home', 'Away', 'Favorite', 'Spread', 'O/U','Attendance', 'Capacity', 'Game ID'], index = None)
-        new_game_info = new_game_info.replace('WSH', 'WAS').replace('SA','SAS').replace('SA<','SAS').replace('NY','NYK').replace('NY<','NYK').replace('NO','NOP').replace('NO<','NOP').replace('GS','GSW').replace('GS<','GSW').replace('UTAH','UTA')
+        new_game_info = new_game_info.replace('WSH', 'WAS').replace('SA','SAS').replace('SA<','SAS').replace('NY','NYK').replace('NY<','NYK')
+        new_game_info = new_game_info.replace('NO','NOP').replace('NO<','NOP').replace('GS','GSW').replace('GS<','GSW').replace('UTAH','UTA')
         all_game_info = pd.concat([collected_game_ids, new_game_info], ignore_index=True, sort = False)
         all_game_info = all_game_info.drop_duplicates()
         all_game_info.to_csv('output/2023/ESPN_game_info2023.csv')  
@@ -109,7 +110,8 @@ def get_2024_game_ids(link, headers, get_all_espn_game_info):
                         else:
                             game_information = get_game_info(game)
                             game_information = pd.DataFrame(game_information).T
-                            game_information.columns = ['Date', 'Home', 'Away', 'Favorite', 'Spread', 'O/U','Attendance', 'Capacity', 'Game ID']
+                            game_information.columns = ['Date', 'Home', 'Away', 'Favorite', 'Spread', 
+                                                        'O/U','Attendance', 'Capacity', 'Game ID']
                     except IndexError:
                         entries_added = (game-1) - max_game_id
                         if entries_added > 1:

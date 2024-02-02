@@ -163,20 +163,32 @@ def daily_seasonal_stats(advanced, traditional, date, year):
         if i != 0:
             new_player = pd.DataFrame(season)
             new_player = new_player.T
-            new_player.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'TOV', 'AST/TO', 'STL', 'BLK', 'EFG%', 'TS%', 'OFFRTG', 'DEFRTG', 'NETRTG', 'PF', 'Plusminus', 'PIE']
+            new_player.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 
+                                  'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 
+                                  'REB', 'AST', 'TOV', 'AST/TO', 'STL', 'BLK', 'EFG%', 'TS%', 'OFFRTG', 
+                                  'DEFRTG', 'NETRTG', 'PF', 'Plusminus', 'PIE']
             season_stats = pd.concat([new_player, season_stats], ignore_index=True, sort=False)
             #season_stats = season_stats.reset_index()
 
         else:
             season_stats = pd.DataFrame(season)
             season_stats = season_stats.T
-            season_stats.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'TOV', 'AST/TO', 'STL', 'BLK', 'EFG%', 'TS%', 'OFFRTG', 'DEFRTG', 'NETRTG', 'PF', 'Plusminus', 'PIE']
+            season_stats.columns = ['Name', 'Team', 'Season', 'GP', 'Win%', 'Mins', 'Points', 'PPM', 'FGM', 
+                                    'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 
+                                    'REB', 'AST', 'TOV', 'AST/TO', 'STL', 'BLK', 'EFG%', 'TS%', 'OFFRTG', 
+                                    'DEFRTG', 'NETRTG', 'PF', 'Plusminus', 'PIE']
         
     season_stats.to_csv(f"output/{year}/Seasonal Stats/{date}.csv")
 
     return True
 
 def update_seasonal_stats(year, get_everything):
+    if type(year) != int:
+        raise ValueError("Please enter input in the form of an integer.")  
+    if type(get_everything) != bool:
+        raise ValueError("Please enter boolean input for get_all_seasonal_stats.")
+    if year != 2023 and year != 2024 and year != 0:
+        raise ValueError('No traditional stats data for year provided. Please use 2023 or 2024.')
     if year == 0:
         return "There were no updates made to the seasonal stats files."
     files_updated = 0

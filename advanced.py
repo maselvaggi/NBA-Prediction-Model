@@ -14,9 +14,9 @@ from selenium.webdriver.common.by import By
 #%%
 def scrape_all_advanced_stats(year):
     '''
-    This function will scrape all of the advavnced player box scores from the current nba regular
-    season up until today's date.  Using the ChromeDriver.exe, we are able to easily
-    parse through the tables of data and save the data in a .csv file and return a 
+    This function will scrape all of the advavnced player box scores from the current nba 
+    regular season up until today's date.  Using the ChromeDriver.exe, we are able to 
+    easily parse through the tables of data and save the data in a .csv file and return a 
     dataframe.
     '''
     if year == 2023 or year == '2023':
@@ -187,10 +187,14 @@ def scrape_new_advanced_stats(year, pages):
             fixed_date = f"{fix_this_date[2]}-{fix_this_date[0]}-{fix_this_date[1]}"
             advanced = advanced.replace(unique_adv_dates[i], fixed_date)
     
-    advanced = advanced[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'OFFRTG', 'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']]
+    advanced = advanced[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'OFFRTG',
+                         'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 
+                         'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']]
     advanced = advanced.drop_duplicates().reset_index()
     #keeps old indexes as column. So I'm just overwriting it in a lazy way-- look into better way
-    advanced = advanced[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'OFFRTG', 'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']]
+    advanced = advanced[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'OFFRTG', 
+                         'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 
+                         'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']]
     advanced = remove_duplicates(advanced)    
 
     advanced.to_csv(f"output/{year}/Advanced{year}.csv")
@@ -274,7 +278,7 @@ def update_advanced_stats(adv_year, adv_pages, all_adv_pages):
                 create_schedule(adv_year)
 
                 return f"All advanced stats were collected. \n{all_added_entries} entries were collected. \n The {adv_year} season schedule has been updated."
-    #if not input, just skip
+    #if no input, just skip
     else:
         return "No new advanced stats were collected."
 
