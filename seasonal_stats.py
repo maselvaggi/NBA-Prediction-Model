@@ -181,39 +181,7 @@ def daily_seasonal_stats(advanced, traditional, date, year):
     season_stats.to_csv(f"output/{year}/Seasonal Stats/{date}.csv")
 
     return True
-
-def update_seasonal_stats(year, get_everything):
-    if type(year) != int:
-        raise ValueError("Please enter input in the form of an integer.")  
-    if type(get_everything) != bool:
-        raise ValueError("Please enter boolean input for get_all_seasonal_stats.")
-    if year != 2023 and year != 2024 and year != 0:
-        raise ValueError('No traditional stats data for year provided. Please use 2023 or 2024.')
-    if year == 0:
-        return "There were no updates made to the seasonal stats files."
-    files_updated = 0
-    traditional = pd.read_csv(f"output/{year}/Traditional{year}.csv", index_col = 0)
-    advanced    = pd.read_csv(f"output/{year}/Advanced{year}.csv", index_col = 0)
-    dates = advanced['Date'].unique()
-
-    for i in tqdm(range(2, len(dates))):
-        if os.path.exists(f"output/{year}/Seasonal Stats/{dates[-i]}.csv") and get_everything is False:
-            pass
-        else:
-            #grab all data up to but not including the date selected.
-            trad_marker = traditional[traditional['Date'] == dates[-i]].index
-            partial_traditional_stats = traditional.iloc[trad_marker[-1]+1:]
-
-            adv_marker = advanced[advanced['Date'] == dates[-i]].index
-            partial_advanced_stats = advanced.iloc[adv_marker[-1]+1:]
-            daily_seasonal_stats(partial_advanced_stats, partial_traditional_stats, dates[-i], year)
-
-            files_updated += 1
-
-    return f"There were {files_updated} files updated in the {year} Season Stats Folder."
-
 #%%
 if __name__ == "__main__":
     seasonal_stats()
     daily_seasonal_stats()
-    update_seasonal_stats()
