@@ -75,7 +75,7 @@ def update_traditional_stats(trad_year, trad_pages, all_trad_pages):
                 return f"All traditional stats have been collected.\n{all_added_entries} entries were collected."
                 
     else:
-        return "No new traditional stats were collected."
+        return f"No new traditional stats were collected."
     
 def update_adv_and_trad_stats(adv_year, adv_pages, all_adv_pages,  trad_year, trad_pages, all_trad_pages,seasonal_stats_year, get_all_seasonal_stats, adv_dates = None, trad_dates = None):
     #Check Inputs
@@ -93,7 +93,7 @@ def update_adv_and_trad_stats(adv_year, adv_pages, all_adv_pages,  trad_year, tr
     if trad_year != 2023 and trad_year != 2024 and trad_year != 0:
         raise ValueError('No traditional stats data for year provided. Please use 2023 or 2024.')
 
-    print((f"                        Advanced Stats                        \n"
+    print((f"                   {adv_year} Advanced Stats                        \n"
            f"=============================================================="))
     #Start collecting specified Advanced Stats data
     if adv_year != 0 and adv_pages != 0:
@@ -127,7 +127,7 @@ def update_adv_and_trad_stats(adv_year, adv_pages, all_adv_pages,  trad_year, tr
                 create_schedule(adv_year)
 
                 print((f"All advanced stats were collected. \n{all_added_entries} entries were collected. \n The {adv_year} season schedule has been updated.\n"))
-    print((f"                      Traditional Stats                       \n"
+    print((f"                  {trad_year} Traditional Stats                       \n"
            f"=============================================================="))
     #Start collecting specified Traditional Stats data
     if trad_year != 0 and trad_pages != 0:
@@ -168,14 +168,14 @@ def update_adv_and_trad_stats(adv_year, adv_pages, all_adv_pages,  trad_year, tr
         if trad_dates is not None:
             seasonal_stats_message = update_seasonal_stats(seasonal_stats_year, get_all_seasonal_stats, trad_dates)
         else:
-            print((f"                       Seasonal Stats                       \n"
-                   f"==============================================================\n"))
-            seasonal_stats_message = "No seasonal stats to update. No dates provided.\n"
+            print((f"                    {seasonal_stats_year} Seasonal Stats                       \n"
+                   f"=============================================================="))
+            seasonal_stats_message = f"No seasonal stats to update. No dates provided.\n"
     
     return seasonal_stats_message
     
 def update_seasonal_stats(seasonal_stats_year, get_all_seasonal_stats, dates_to_update=None):
-    print((f"                       Seasonal Stats                       \n"
+    print((f"                      {seasonal_stats_year} Seasonal Stats                       \n"
            f"=============================================================="))
     if dates_to_update is None and get_all_seasonal_stats is False:
         return "No seasonal stat files to update.\n"

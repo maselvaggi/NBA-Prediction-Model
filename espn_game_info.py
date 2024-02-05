@@ -20,7 +20,7 @@ def update_espn_game_info(year, get_all_espn_game_info):
     2024 Game ID range: 401584689 - 401585828
     '''
     print((f"                       ESPN Game Info                       \n"
-           f"==============================================================\n"))
+           f"=============================================================="))
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.86 Safari/537.36'}
 
     link = 'https://www.espn.com/nba/game/_/gameId/'
@@ -61,7 +61,7 @@ def get_2023_game_ids(link, headers, get_all_espn_game_info):
                     if record.status_code == 200:
                         new_game_info.append(get_game_info(game))
         else:
-            return "There is no 2023 game information to collect. The file is up to date."
+            return f"There is no 2023 game information to collect. The file is up to date.\n"
 
         new_game_info = pd.DataFrame(new_game_info, columns=['Date', 'Home', 'Away', 'Favorite', 'Spread', 'O/U','Attendance', 'Capacity', 'Game ID'], index = None)
         new_game_info = new_game_info.replace('WSH', 'WAS').replace('SA','SAS').replace('SA<','SAS').replace('NY','NYK').replace('NY<','NYK')
@@ -70,7 +70,7 @@ def get_2023_game_ids(link, headers, get_all_espn_game_info):
         all_game_info = all_game_info.drop_duplicates()
         all_game_info.to_csv('output/2023/ESPN_game_info2023.csv')  
         entries_added = len(all_game_info) - len(collected_game_ids)
-        return f"All available 2023 game info was collected. \n {entries_added} entries were collected."
+        return f"All available 2023 game info was collected. {entries_added} entries were collected.\n"
     else:
         for game in tqdm(range(401468016, 401469385+1)):
             if game == 401468924:
@@ -85,7 +85,7 @@ def get_2023_game_ids(link, headers, get_all_espn_game_info):
         new_game_info = new_game_info.replace('WSH', 'WAS').replace('SA','SAS').replace('SA<','SAS').replace('NY','NYK').replace('NY<','NYK').replace('NO','NOP').replace('NO<','NOP').replace('GS','GSW').replace('GS<','GSW').replace('UTAH','UTA')
         new_game_info.to_csv('output/2023/ESPN_game_info2023.csv') 
 
-        return f"All available 2023 game information was collected.\n{len(new_game_info)} entries were collected"   
+        return f"All available 2023 game information was collected. {len(new_game_info)} entries were collected.\n"   
 
 def get_2024_game_ids(link, headers, get_all_espn_game_info):
     new_game_info = []
@@ -122,7 +122,7 @@ def get_2024_game_ids(link, headers, get_all_espn_game_info):
                         elif entries_added == 1:
                             print('There was information gathered for 1 game.')
                         else:
-                            return "There is no 2024 game information to collect. The file is up to date."
+                            return f"There is no 2024 game information to collect. The file is up to date.\n"
                         break
 
             if len(game_information) > 0:
@@ -135,11 +135,11 @@ def get_2024_game_ids(link, headers, get_all_espn_game_info):
                 entries_added = len(all_game_info) - len(collected_game_ids)
 
 
-                return f"{entries_added} games were added to the 2024 ESPN game info csv."
+                return f"{entries_added} games were added to the 2024 ESPN game info csv.\n"
 
         else:
             print('print this')
-            return "No game to add to the 2024 season schedule."
+            return f"No game to add to the 2024 season schedule.\n"
     else:
         for game in tqdm(range(401584689, 401585828+1)):
             if game == 401585204 or game == 401585217:
@@ -163,16 +163,16 @@ def get_2024_game_ids(link, headers, get_all_espn_game_info):
                 except IndexError:
                     if len(game_information) > 1:
                         game_information.to_csv('output/2024/ESPN_game_info2024.csv') 
-                        return f"There was information gathered for {len(game_information)} games."
+                        return f"There was information gathered for {len(game_information)} games.\n"
                     elif len(game_information) == 1:
                         game_information.to_csv('output/2024/ESPN_game_info2024.csv') 
-                        return 'There was information gathered for 1 game.'
+                        return f"There was information gathered for 1 game.\n"
                     else:
-                        return "There was no game information collected. The file is up to date."
+                        return f"There was no game information collected. The file is up to date.\n"
                     
 
         game_information.to_csv('output/2024/ESPN_game_info2024.csv') 
-        return f"All available game information was successfully collected.\n{len(new_game_info)} entries were collected."
+        return f"All available game information was successfully collected. {len(new_game_info)} entries were collected.\n"
 
 def get_game_info(game_id):
     '''
