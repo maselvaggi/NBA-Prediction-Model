@@ -1,4 +1,5 @@
 #%%
+from rotation_size import *
 from espn_game_info import *
 from update_statistics import *
 #%%
@@ -26,7 +27,10 @@ def run_updates(adv_year: int = 0, adv_pages: int = 0, all_adv_pages: bool = Fal
     #ESPN Game Information
     print(update_espn_game_info(espn_game_info_year, get_all_espn_game_info))
 
-    return "Updates are complete."
+    #update rotation size file
+    print(get_team_rotations(adv_year))
+
+    return f"Updates are complete."
 # %%
 run_updates(adv_year=2024, adv_pages=5, trad_year=2024, trad_pages=5, seasonal_stats_year=2024, espn_game_info_year=2024)
 # %%
