@@ -93,13 +93,15 @@ def update_adv_and_trad_stats(adv_year, adv_pages, all_adv_pages,  trad_year, tr
     if trad_year != 2023 and trad_year != 2024 and trad_year != 0:
         raise ValueError('No traditional stats data for year provided. Please use 2023 or 2024.')
 
+    print((f"                        Advanced Stats                        \n"
+           f"=============================================================="))
     #Start collecting specified Advanced Stats data
     if adv_year != 0 and adv_pages != 0:
         if all_adv_pages is True:
             all_advanced_stats = scrape_all_advanced_stats(adv_year)
             adv_dates = all_advanced_stats['Date'].unique()
 
-            adv_messaage = f"All advanced stats were collected with {len(all_advanced_stats)} entries added to the Advanved stats .csv file."
+            print((f"All advanced stats were collected with {len(all_advanced_stats)} entries added to the Advanved stats .csv file.\n"))
         else:
             #if there is no file to update, must collect all data
             if os.path.exists(f"output/{adv_year}/Advanced{adv_year}.csv"):
@@ -112,11 +114,11 @@ def update_adv_and_trad_stats(adv_year, adv_pages, all_adv_pages,  trad_year, tr
 
                 if updated_adv_entries > 0:
                     create_schedule(adv_year)
-                    adv_messaage = f"The {adv_year} Advanced stats and Schedule files have been updated.\n{updated_adv_entries} entries were added to the Advanced stats .csv file."
+                    print((f"The {adv_year} Advanced stats and Schedule files have been updated.\n{updated_adv_entries} entries were added to the Advanced stats .csv file.\n"))
 
                 else:
                     adv_dates = None
-                    adv_messaage = f"Advanced stats file was not updated, no new entries to add.\nThe {adv_year} season schedule was not updated."
+                    print((f"Advanced stats file was not updated, no new entries to add.\nThe {adv_year} season schedule was not updated.\n"))
 
             else:
                 all_advanced_stats = scrape_all_advanced_stats(adv_year)
@@ -124,15 +126,16 @@ def update_adv_and_trad_stats(adv_year, adv_pages, all_adv_pages,  trad_year, tr
                 adv_dates = all_advanced_stats['Date'].unique()
                 create_schedule(adv_year)
 
-                adv_messaage = f"All advanced stats were collected. \n{all_added_entries} entries were collected. \n The {adv_year} season schedule has been updated."
-    
+                print((f"All advanced stats were collected. \n{all_added_entries} entries were collected. \n The {adv_year} season schedule has been updated.\n"))
+    print((f"                      Traditional Stats                       \n"
+           f"=============================================================="))
     #Start collecting specified Traditional Stats data
     if trad_year != 0 and trad_pages != 0:
         if all_trad_pages == True:
             all_traditional_stats = scrape_all_traditional_stats(trad_year)
             trad_dates = all_traditional_stats['Date'].unique()
 
-            trad_message =  f"All traditional stats were collected. \n{len(all_traditional_stats)} entries were collected."
+            print((f"All traditional stats were collected. \n{len(all_traditional_stats)} entries were collected.\n"))
         else:
             if os.path.exists(f"output/{trad_year}/Traditional{trad_year}.csv"):
                 old_traditional_stats = pd.read_csv(f"output/{trad_year}/Traditional{trad_year}.csv")
@@ -142,15 +145,15 @@ def update_adv_and_trad_stats(adv_year, adv_pages, all_adv_pages,  trad_year, tr
 
                 if updated_trad_entries > 0:
                     trad_dates = new_traditional_stats['Date'].unique()
-                    trad_message = f"Traditional stats file has been updated.\n{updated_trad_entries} entries were added to the traditional stats .csv file."
+                    print((f"Traditional stats file has been updated.\n{updated_trad_entries} entries were added to the traditional stats .csv file.\n"))
                 else:
                     trad_dates = None
-                    trad_message = "Traditional stats file was not updated, no new entries to add."
+                    print((f"Traditional stats file was not updated, no new entries to add.\n"))
             else:
                 all_traditional_stats = scrape_all_traditional_stats(trad_year)
                 all_added_entries = len(all_traditional_stats)
 
-                trad_message = f"All traditional stats have been collected.\n{all_added_entries} entries were collected."
+                print((f"All traditional stats have been collected.\n{all_added_entries} entries were collected.\n"))
     
     #Combine dates
     if adv_dates is not None:
@@ -165,13 +168,17 @@ def update_adv_and_trad_stats(adv_year, adv_pages, all_adv_pages,  trad_year, tr
         if trad_dates is not None:
             seasonal_stats_message = update_seasonal_stats(seasonal_stats_year, get_all_seasonal_stats, trad_dates)
         else:
-            seasonal_stats_message = "No seasonal stats to update. No dates provided."
+            print((f"                       Seasonal Stats                       \n"
+                   f"==============================================================\n"))
+            seasonal_stats_message = "No seasonal stats to update. No dates provided.\n"
     
-    return adv_messaage + trad_message + seasonal_stats_message
+    return seasonal_stats_message
     
 def update_seasonal_stats(seasonal_stats_year, get_all_seasonal_stats, dates_to_update=None):
+    print((f"                       Seasonal Stats                       \n"
+           f"=============================================================="))
     if dates_to_update is None and get_all_seasonal_stats is False:
-        return "No seasonal stat files to update."
+        return "No seasonal stat files to update.\n"
     if type(seasonal_stats_year) != int:
         raise ValueError("Please enter input in the form of an integer.")  
     if type(get_all_seasonal_stats) != bool:
@@ -179,7 +186,7 @@ def update_seasonal_stats(seasonal_stats_year, get_all_seasonal_stats, dates_to_
     if seasonal_stats_year != 2023 and seasonal_stats_year != 2024 and seasonal_stats_year != 0:
         raise ValueError('No traditional stats data for year provided. Please use 2023 or 2024.')
     if seasonal_stats_year == 0:
-        return "There were no updates made to the seasonal stats files."
+        return "There were no updates made to the seasonal stats files.\n"
     
     files_updated = 0
     traditional = pd.read_csv(f"output/{seasonal_stats_year}/Traditional{seasonal_stats_year}.csv", index_col = 0)
@@ -199,7 +206,7 @@ def update_seasonal_stats(seasonal_stats_year, get_all_seasonal_stats, dates_to_
 
             files_updated += 1
 
-        return f"There were {files_updated} files updated in the {seasonal_stats_year} season stats folder."
+        return f"There were {files_updated} files updated in the {seasonal_stats_year} season stats folder.\n"
     else:
         for i in tqdm(range(len(dates_to_update))):
             #grab all data up to but not including the date selected.
@@ -212,7 +219,7 @@ def update_seasonal_stats(seasonal_stats_year, get_all_seasonal_stats, dates_to_
 
             files_updated += 1            
 
-        return f"There were {files_updated} files updated in the {seasonal_stats_year} season stats folder."
+        return f"There were {files_updated} files updated in the {seasonal_stats_year} season stats folder.\n"
 
 #%%
 if __name__=="__main__":

@@ -19,6 +19,8 @@ def update_espn_game_info(year, get_all_espn_game_info):
     2023 Game ID range: 401468016 - 401469385
     2024 Game ID range: 401584689 - 401585828
     '''
+    print((f"                       ESPN Game Info                       \n"
+           f"==============================================================\n"))
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.86 Safari/537.36'}
 
     link = 'https://www.espn.com/nba/game/_/gameId/'
