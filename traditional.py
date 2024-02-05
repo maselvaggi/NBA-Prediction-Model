@@ -175,13 +175,8 @@ def scrape_new_traditional_stats(year, pages):
     df_T_new[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus' ]] = df_T_new[['Mins', 'Points', 'FGM','FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV','PF', 'Plusminus']].apply(pd.to_numeric) 
     df_T_new[['FG%', '3P%', 'FT%']] = df_T_new[['FG%', '3P%', 'FT%']].astype(float)
     
-    traditional_old = pd.read_csv(f"output/{year}/Traditional{year}.csv")
-    traditional = pd.concat([df_T_new, traditional_old], ignore_index=True, sort=False)
-    traditional = traditional[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'Points',
-                               'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%','FTM', 'FTA', 'FT%', 'OREB', 'DREB',
-                               'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']]
-
-    unique_trad_dates = traditional['Date'].unique()
+    #fix dates, concat new with old, return only new data
+    unique_trad_dates = df_T_new['Date'].unique()
     for i in range(len(unique_trad_dates)):
         if "/" not in unique_trad_dates[i]:
             pass
@@ -190,7 +185,13 @@ def scrape_new_traditional_stats(year, pages):
             fix_this_date = fix_this_date.split('/')
             fixed_date = f"{fix_this_date[2]}-{fix_this_date[0]}-{fix_this_date[1]}"
 
-            traditional = traditional.replace(unique_trad_dates[i], fixed_date)
+            df_T_new = df_T_new.replace(unique_trad_dates[i], fixed_date)    
+    
+    traditional_old = pd.read_csv(f"output/{year}/Traditional{year}.csv")
+    traditional = pd.concat([df_T_new, traditional_old], ignore_index=True, sort=False)
+    traditional = traditional[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'Points',
+                               'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%','FTM', 'FTA', 'FT%', 'OREB', 'DREB',
+                               'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']]
 
     traditional = traditional.drop_duplicates().reset_index()
     #keeps old indexes as column. So I'm just overwriting it in a lazy way-- look into better way
@@ -198,11 +199,9 @@ def scrape_new_traditional_stats(year, pages):
                                'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%','FTM', 'FTA', 'FT%', 'OREB', 'DREB', 
                                'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']]
     traditional = remove_duplicates(traditional)
-
-
     traditional.to_csv(f"output/{year}/Traditional{year}.csv")
 
-    return traditional    
+    return df_T_new    
 
 def clean_new_traditional_stats(year):
     traditional = open(f"output/{year}/NewTraditionalStats{year}.txt")
@@ -218,44 +217,7 @@ def clean_new_traditional_stats(year):
     
     return T_box_scores
 
-def update_traditional_stats(trad_year, trad_pages, all_trad_pages):
-    if type(trad_year) != int or type(trad_pages) != int:
-        raise ValueError("Please enter input in the form of an integer.")  
-    if type(all_trad_pages) != bool:
-        raise ValueError("Please enter boolean input for all_trad_pages.")
-    if trad_year != 2023 and trad_year != 2024 and trad_year != 0:
-        raise ValueError('No traditional stats data for year provided. Please use 2023 or 2024.')
-
-    if trad_year != 0 and trad_pages != 0:
-        if all_trad_pages == True:
-            all_traditional_stats = scrape_all_traditional_stats(trad_year)
-            all_added_entries = len(all_traditional_stats)
-
-            return f"All traditional stats were collected. \n{all_added_entries} entries were collected."
-        else:
-            if os.path.exists(f"output/{trad_year}/Traditional{trad_year}.csv"):
-                old_traditional_stats = pd.read_csv(f"output/{trad_year}/Traditional{trad_year}.csv")
-                old_traditional_stats = len(old_traditional_stats)
-
-                new_traditional_stats = scrape_new_traditional_stats(trad_year, trad_pages)
-                new_traditional_stats = len(new_traditional_stats)
-                updated_trad_entries  = new_traditional_stats - old_traditional_stats
-
-                if updated_trad_entries > 0:
-                    return f"Traditional stats file has been updated.\n{updated_trad_entries} entries were added to the traditional stats .csv file."
-                else:
-                    return "Traditional stats file was not updated, no new entries to add."
-            else:
-                all_traditional_stats = scrape_all_traditional_stats(trad_year)
-                all_added_entries = len(all_traditional_stats)
-
-                return f"All traditional stats have been collected.\n{all_added_entries} entries were collected."
-                
-    else:
-        return "No new traditional stats were collected."
-
 # %%
 if __name__ == "__main__":
     scrape_all_traditional_stats()
     scrape_new_traditional_stats()
-    update_traditional_stats()

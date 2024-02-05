@@ -1,6 +1,7 @@
 #%%
 import time
 import os.path
+import numpy as np
 import pandas as pd
 
 from tqdm import tqdm
@@ -173,11 +174,9 @@ def scrape_new_advanced_stats(year, pages):
 
     df_A_new[['Mins']] = df_A_new[['Mins']].apply(pd.to_numeric)
     df_A_new[['OFFRTG', 'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']] = df_A_new[['OFFRTG', 'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']].astype(float)
-    
-    advanced_old = pd.read_csv(f"output/{year}/Advanced{year}.csv")
-    advanced = pd.concat([df_A_new, advanced_old], ignore_index=True, sort=False)
 
-    unique_adv_dates = advanced['Date'].unique()
+    #fix dates, concat new with old, return only new data
+    unique_adv_dates = df_A_new['Date'].unique()
     for i in range(len(unique_adv_dates)):
         if '/' not in unique_adv_dates[i]:
             pass
@@ -185,21 +184,24 @@ def scrape_new_advanced_stats(year, pages):
             fix_this_date = unique_adv_dates[i]
             fix_this_date = fix_this_date.split('/')
             fixed_date = f"{fix_this_date[2]}-{fix_this_date[0]}-{fix_this_date[1]}"
-            advanced = advanced.replace(unique_adv_dates[i], fixed_date)
+            df_A_new = df_A_new.replace(unique_adv_dates[i], fixed_date)
+
+    advanced_old = pd.read_csv(f"output/{year}/Advanced{year}.csv")
+    advanced = pd.concat([df_A_new, advanced_old], ignore_index=True, sort=False)
     
     advanced = advanced[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'OFFRTG',
                          'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 
                          'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']]
     advanced = advanced.drop_duplicates().reset_index()
-    #keeps old indexes as column. So I'm just overwriting it in a lazy way-- look into better way
+    #keeps old indexes as column. So I'm just overwriting it in a lazy way
     advanced = advanced[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'OFFRTG', 
                          'DEFRTG', 'NETRTG', 'AST%', 'AST/TO', 'AST RATIO', 'OREB%', 'DREB%', 'REB%', 
                          'TO RATIO', 'EFG%', 'TS%', 'USG%', 'PACE', 'PIE']]
+    
     advanced = remove_duplicates(advanced)    
-
     advanced.to_csv(f"output/{year}/Advanced{year}.csv")
     
-    return advanced
+    return df_A_new
 
 def clean_new_advanced_stats(year):
     """
@@ -219,72 +221,9 @@ def clean_new_advanced_stats(year):
     new_adv_scores = adv_format_rows(A_box_scores)
     
     return new_adv_scores
-    
-def remove_duplicates(data):
-    """
-    This function removes duplicate rows from the updated dataframe.
-    """
-    names = data['Name'].unique()
-    fix_names = []
-    for i in names:
-        guy = data[data['Name'] == i]    
-        if len(guy['Name']) != len(guy['Date'].unique()):
-            fix_names.append(i)
-
-    #remove duplicate row for single date. Lower interger index value is correct (more recent)
-    duplicates = []
-    for i in fix_names:
-        guy = data[data['Name'] == i]
-        duplicates.append(guy.index[guy.duplicated(['Date'])].tolist())
-
-    for i in duplicates:
-        data = data.drop(index = i[0])    
-    return data
-
-def update_advanced_stats(adv_year, adv_pages, all_adv_pages):
-    #protect against random inputs
-    if type(adv_year) != int or type(adv_pages) != int:
-        raise ValueError("Please enter input in the form of an integer.")    
-    if adv_year != 2023 and adv_year != 2024 and adv_year != 0:
-        raise ValueError(f"No Advanced Stats data for year: {adv_year}. Please use 2023 or 2024.")
-    #if value is 2023 or 2024 and positive pages
-    if adv_year != 0 and adv_pages != 0:
-        if all_adv_pages == True:
-            all_advanced_stats = scrape_all_advanced_stats(adv_year)
-            all_added_entries = len(all_advanced_stats)
-
-            create_schedule(adv_year)
-            return f"All advanced stats were collected. \n{all_added_entries} entries were collected. \nThe {adv_year} season schedule has been updated."
-        else:
-            #if there is no file to update, must collect all data
-            if os.path.exists(f"output/{adv_year}/Advanced{adv_year}.csv"):
-                old_advanced_stats = pd.read_csv(f"output/{adv_year}/Advanced{adv_year}.csv")
-                old_advanced_stats = len(old_advanced_stats)
-
-                new_advanced_stats = scrape_new_advanced_stats(adv_year, adv_pages)
-                new_advanced_stats = len(new_advanced_stats)
-                updated_adv_entries = new_advanced_stats - old_advanced_stats
-
-                if updated_adv_entries > 0:
-                    create_schedule(adv_year)
-                    return f"Advanced stats file has been updated.\n{updated_adv_entries} entries were added to the Advanced stats .csv file.\nThe {adv_year} season schedule file has been updated."
-
-                else:
-                    return f"Advanced stats file was not updated, no new entries to add.\nThe {adv_year} season schedule was not updated."
-
-            else:
-                all_advanced_stats = scrape_all_advanced_stats(adv_year)
-                all_added_entries = len(all_advanced_stats)
-                create_schedule(adv_year)
-
-                return f"All advanced stats were collected. \n{all_added_entries} entries were collected. \n The {adv_year} season schedule has been updated."
-    #if no input, just skip
-    else:
-        return "No new advanced stats were collected."
-
 
 #%%
 if __name__ == "__main__":
     scrape_all_advanced_stats()
     scrape_new_advanced_stats()
-    update_advanced_stats()
+
