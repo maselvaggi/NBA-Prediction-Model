@@ -22,8 +22,10 @@ def get_team_rotations(year):
     Last, we round off the rotation size and save that as a .csv file 
     to be used as an input when running the model.  
     """
+    print((f"                   {year} Rotation Size File                     \n"
+           f"=============================================================="))    
     box_scores = pd.read_csv(f"output/{year}/Advanced{year}.csv", index_col=0)
-    box_scores['Date'] = pd.to_datetime(box_scores['Date'], format = '%m/%d/%Y')
+    box_scores['Date'] = pd.to_datetime(box_scores['Date'], format = '%Y-%m-%d')
     box_scores = box_scores.sort_values(by = ['Date'], ascending = True)
     teams = box_scores['Team'].unique()
 
@@ -46,7 +48,7 @@ def get_team_rotations(year):
     sma = []
     cma = []
     for i in teams:
-        #get simply moving average of 10 game window
+        #get simple moving average of 10 game window
         sma_team = rotations[i].rolling(10).mean().to_numpy() 
         sma.append(sma_team)
         
@@ -57,18 +59,20 @@ def get_team_rotations(year):
     sma = pd.DataFrame(sma)
     sma = sma.T
     sma.columns = teams
+    sma = sma.iloc[9:]
+
 
     cma = pd.DataFrame(cma)
     cma = cma.T
     cma.columns = teams
-    ten_games = cma.iloc[0:9]
-    sma = sma.dropna()
-    rotations = pd.concat([ten_games, sma])
+    first_ten_games = cma.iloc[0:9]
+
+    rotations = pd.concat([first_ten_games, sma])
 
     model_rotations = round(rotations)
     model_rotations.to_csv(f"output/{year}/Rotations{year}.csv")
 
-    return model_rotations
+    return f"{year} rotation size file is updated!"
 #%%
 if __name__ == "__main__":
     get_team_rotations()
