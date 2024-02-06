@@ -96,8 +96,8 @@ def update_adv_and_trad_stats(adv_year, adv_pages, all_adv_pages,  trad_year, tr
     print((f"                   {adv_year} Advanced Stats                        \n"
            f"=============================================================="))
     #Start collecting specified Advanced Stats data
-    if adv_year != 0 and adv_pages != 0:
-        if all_adv_pages is True:
+    if adv_year != 0:
+        if all_adv_pages is True or adv_pages == 0:
             all_advanced_stats = scrape_all_advanced_stats(adv_year)
             adv_dates = all_advanced_stats['Date'].unique()
 
@@ -130,8 +130,8 @@ def update_adv_and_trad_stats(adv_year, adv_pages, all_adv_pages,  trad_year, tr
     print((f"                  {trad_year} Traditional Stats                       \n"
            f"=============================================================="))
     #Start collecting specified Traditional Stats data
-    if trad_year != 0 and trad_pages != 0:
-        if all_trad_pages == True:
+    if trad_year != 0:
+        if all_trad_pages == True or trad_pages == 0:
             all_traditional_stats = scrape_all_traditional_stats(trad_year)
             trad_dates = all_traditional_stats['Date'].unique()
 

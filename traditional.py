@@ -192,7 +192,18 @@ def scrape_new_traditional_stats(year, pages):
     traditional = traditional[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'Points',
                                'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%','FTM', 'FTA', 'FT%', 'OREB', 'DREB',
                                'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus']]
+    
+    unique_trad_dates = traditional['Date'].unique()
+    for i in range(len(unique_trad_dates)):
+        if "/" not in unique_trad_dates[i]:
+            pass
+        else:
+            fix_this_date = unique_trad_dates[i]
+            fix_this_date = fix_this_date.split('/')
+            fixed_date = f"{fix_this_date[2]}-{fix_this_date[0]}-{fix_this_date[1]}"
 
+            traditional = traditional.replace(unique_trad_dates[i], fixed_date)    
+   
     traditional = traditional.drop_duplicates().reset_index()
     #keeps old indexes as column. So I'm just overwriting it in a lazy way-- look into better way
     traditional = traditional[['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 'Mins', 'Points', 
@@ -221,3 +232,7 @@ def clean_new_traditional_stats(year):
 if __name__ == "__main__":
     scrape_all_traditional_stats()
     scrape_new_traditional_stats()
+
+#%%
+traditional = pd.read_csv("output/2024/Traditional2024.csv", index_col=0)
+traditional['Date'].unique()

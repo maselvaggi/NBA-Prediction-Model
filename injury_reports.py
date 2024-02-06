@@ -6,7 +6,6 @@ from tqdm import tqdm
 from pypdf import PdfReader
 # import numpy as np
 # import re
-# import time
 # from lxml import html
 # from lxml import etree
 # from bs4 import BeautifulSoup
@@ -485,21 +484,29 @@ def injury_report_links_and_names(year, get_only_file_names:bool = False):
     file_name_dates =  schedule['Date'].to_numpy()
     home = schedule['Team'].to_numpy()
     away = schedule['Opponent'].to_numpy()
+    file_names = []
 
     if get_only_file_names is True:
         #this only gets called in injury_df()
-        file_names = [i +f"_{away[i]}{home[i]}.pdf" for i in file_name_dates]
+        file_names = [file_name_dates[i] +f"_{away[i]}{home[i]}.pdf" for i in range(len(file_name_dates))]
         return file_names     
     else:
         links = []
-        file_names = [i +f"_{away[i]}{home[i]}.pdf" for i in file_name_dates]
+        
         for i in range(len(link_dates)):
             links.append(f"https://ak-static.cms.nba.com/referee/injury/Injury-Report_{link_dates[i]}_09PM.pdf")
-    
+            file_names.append(link_dates[i]+'.pdf')
         return links, file_names
 
 #%%
 if __name__ == "__main__":
-    get_injury_data()
-    injury_report_download()
-    injury_report_links_and_names()
+#    get_injury_data(2024)
+    injury_report_download(2024)
+#    injury_report_links_and_names()
+
+#%%
+schedule  = pd.read_csv(f"output/{year}/Schedule{year}.csv", index_col = 0)
+file_name_dates =  schedule['Date'].to_numpy()
+home = schedule['Team'].to_numpy()
+away = schedule['Opponent'].to_numpy()
+file_names = [file_name_dates[i] +f"_{away[i]}{home[i]}.pdf" for i in range(len(file_name_dates))]
