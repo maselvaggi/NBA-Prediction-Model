@@ -49,14 +49,3 @@ def run_updates(adv_year: int = 0, adv_pages: int = 0, all_adv_pages: bool = Fal
     print(get_team_rotations(adv_year, trad_year))
 
     return f"Updates are complete."
-#%%
-run_updates(trad_year=2024, all_trad_pages = True)
-
-# %%
-trad = pd.read_csv('output/2024/Traditional2024.csv', index_col = 0)
-trad_dates = trad['Date'].unique()
-
-#%%
-trad_dates
-# %%
-advanced
