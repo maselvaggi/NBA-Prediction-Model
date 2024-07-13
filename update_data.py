@@ -48,4 +48,4 @@ def run_updates(adv_year: int = 0, adv_pages: int = 0, all_adv_pages: bool = Fal
     #update rotation size file
     print(get_team_rotations(adv_year, trad_year))
 
-    return f"Updates are complete."
+    return f"Updates are complete." 
