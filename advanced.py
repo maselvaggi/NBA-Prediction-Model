@@ -23,7 +23,7 @@ def scrape_all_advanced_stats(year):
     if year == 2023 or year == '2023':
         link = 'https://www.nba.com/stats/players/boxscores-advanced?Season=2022-23'
     else:
-        link = 'https://www.nba.com/stats/players/boxscores-advanced'
+        link = 'https://www.nba.com/stats/players/boxscores-advanced?SeasonType=Regular+Season'
 
     driver = webdriver.Chrome()
     driver.get(link)
@@ -31,10 +31,13 @@ def scrape_all_advanced_stats(year):
     driver.implicitly_wait(25)
 #    driver.find_element_by_xpath('/html/body/div[5]/div[3]/div/div/div/button').click()
     time.sleep(15)
-    driver.find_element(By.XPATH, '/html/body/div[3]/div[2]/div/div[2]/button').click()
+
+    #pop up
+ #   driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[5]/button[2]').click()
     time.sleep(20)
-    
-    drop_down = driver.find_element(By.XPATH, '/html/body/div[1]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[3]/div/label/div/select')
+
+    #get number of pages
+    drop_down = driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[3]/div/label/div/select')
     options = [x for x in drop_down.find_elements(By.TAG_NAME, "option")]
     pages = []
     for element in options:
@@ -42,8 +45,10 @@ def scrape_all_advanced_stats(year):
 
     A_tables = []
     for i in tqdm(range(1, len(pages))):
+        # table body text
         text = driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[3]/table/tbody').text
         A_tables.append(text)
+        # right arrow button
         driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[5]/button[2]').click()
         time.sleep(1)
     
@@ -75,6 +80,7 @@ def scrape_all_advanced_stats(year):
     df_A.to_csv(f"output/{year}/Advanced{year}.csv")
     
     return df_A
+
 
 def adv_format_rows(A_box_scores):
     """
@@ -126,7 +132,7 @@ def scrape_new_advanced_stats(year, pages):
     if year == 2023 or year == '2023':
         link = 'https://www.nba.com/stats/players/boxscores-advanced?Season=2022-23'
     else:
-        link = 'https://www.nba.com/stats/players/boxscores-advanced'
+        link = 'https://www.nba.com/stats/players/boxscores-advanced?SeasonType=Regular+Season'
 
     driver = webdriver.Chrome()
     driver.get(link)
@@ -140,10 +146,11 @@ def scrape_new_advanced_stats(year, pages):
     #     except Exception:
     #         pass
     time.sleep(20)
-    driver.find_element(By.XPATH, '/html/body/div[3]/div[2]/div/div[2]/button').click()
+#    driver.find_element(By.XPATH, '/html/body/div[3]/div[2]/div/div[2]/button').click()
     time.sleep(20)
 
-    drop_down = driver.find_element(By.XPATH, '/html/body/div[1]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[3]/div/label/div/select')
+    #get number of pages
+    drop_down = driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[3]/div/label/div/select')
     options = [x for x in drop_down.find_elements(By.TAG_NAME, "option")]
     table_pages = []
     for element in options:
@@ -151,11 +158,13 @@ def scrape_new_advanced_stats(year, pages):
 
     if pages > len(table_pages):
         raise ValueError(f"The number of pages you entred: {pages} is greater than the number of pages available: {len(table_pages)}.")    
-    
+
     A_tables = []
     for i in tqdm(range(1, pages+1)):
+        # table body text
         text = driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[3]/table/tbody').text
         A_tables.append(text)
+        # right arrow button
         driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[5]/button[2]').click()
         time.sleep(2)
     

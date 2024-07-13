@@ -503,10 +503,3 @@ if __name__ == "__main__":
 #    get_injury_data(2024)
     injury_report_download(2024)
 #    injury_report_links_and_names()
-
-#%%
-schedule  = pd.read_csv(f"output/{year}/Schedule{year}.csv", index_col = 0)
-file_name_dates =  schedule['Date'].to_numpy()
-home = schedule['Team'].to_numpy()
-away = schedule['Opponent'].to_numpy()
-file_names = [file_name_dates[i] +f"_{away[i]}{home[i]}.pdf" for i in range(len(file_name_dates))]

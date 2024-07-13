@@ -60,7 +60,6 @@ def update_traditional_stats(trad_year, trad_pages, all_trad_pages):
             if os.path.exists(f"output/{trad_year}/Traditional{trad_year}.csv"):
                 old_traditional_stats = pd.read_csv(f"output/{trad_year}/Traditional{trad_year}.csv")
                 new_traditional_stats = scrape_new_traditional_stats(trad_year, trad_pages)
-
                 updated_trad_entries  = len(new_traditional_stats) - len(old_traditional_stats)
 
                 if updated_trad_entries > 0:
@@ -105,14 +104,15 @@ def update_adv_and_trad_stats(adv_year, adv_pages, all_adv_pages,  trad_year, tr
         else:
             #if there is no file to update, must collect all data
             if os.path.exists(f"output/{adv_year}/Advanced{adv_year}.csv"):
-                old_advanced_stats = pd.read_csv(f"output/{adv_year}/Advanced{adv_year}.csv")
-                new_advanced_stats = scrape_new_advanced_stats(adv_year, adv_pages)
-                completed_advanced_stats = pd.read_csv(f"output/{adv_year}/Advanced{adv_year}.csv")
-                updated_adv_entries = len(completed_advanced_stats) - len(old_advanced_stats)
+                old_advanced_stats  = pd.read_csv(f"output/{adv_year}/Advanced{adv_year}.csv")
+                scrape_new_advanced_stats(adv_year, adv_pages)
+                
+                new_advanced_stats  = pd.read_csv(f"output/{adv_year}/Advanced{adv_year}.csv")                
+                updated_adv_entries = len(new_advanced_stats) - len(old_advanced_stats)
 
                 adv_dates = new_advanced_stats['Date'].unique()
 
-                if updated_adv_entries > 0:
+                if updated_adv_entries != 0:
                     create_schedule(adv_year)
                     print((f"The {adv_year} Advanced stats and Schedule files have been updated.\n{updated_adv_entries} entries were added to the Advanced stats .csv file.\n"))
 
@@ -127,6 +127,8 @@ def update_adv_and_trad_stats(adv_year, adv_pages, all_adv_pages,  trad_year, tr
                 create_schedule(adv_year)
 
                 print((f"All advanced stats were collected. \n{all_added_entries} entries were collected. \n The {adv_year} season schedule has been updated.\n"))
+
+
     print((f"                  {trad_year} Traditional Stats                       \n"
            f"=============================================================="))
     #Start collecting specified Traditional Stats data

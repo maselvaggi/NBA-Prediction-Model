@@ -1,0 +1,5 @@
+{
+    "editor.showFoldingControls": "mouseover",
+    "notebook.showFoldingControls": "always",
+    "editor.foldingStrategy": "indentation"
+}

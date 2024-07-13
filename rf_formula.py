@@ -12,12 +12,12 @@ def create_inputs(year):
     This functions remakes the input .csv file for the model to be run.
     This just needs to be updated when factor model weights change.
     '''
-    schedule = pd.read_csv('output/{num}/Schedule{num}.csv'.format(num = year), index_col = 0)
-    rotations= pd.read_csv('output/{num}/Rotations{num}.csv'.format(num = year), index_col = 0)
-    matchups = pd.read_csv('output/{num}/Caesars_Lines{num}.csv'.format(num = year), index_col=0)
+    schedule = pd.read_csv(f"output/{year}/Schedule{year}.csv", index_col = 0)
+    rotations= pd.read_csv(f"output/{year}/Rotations{year}.csv", index_col = 0)
+    matchups = pd.read_csv(f"output/{year}/Caesars_Lines{year}.csv", index_col=0)
     day      = matchups[matchups['Date'] == '11/20/2022'].index
     matchups = matchups.iloc[day[0]:]
-    injuries = pd.read_csv('output/{num}/Injury_Data.csv'.format(num = year), index_col = 0)
+    injuries = pd.read_csv(f"output/{year}/Injury_Data{year}.csv", index_col = 0)
 
     for i in range(len(matchups)): #len(matchups))):
         date, home, away = matchups['Date'].iloc[i], matchups['Home'].iloc[i], matchups['Away'].iloc[i]
@@ -28,6 +28,7 @@ def create_inputs(year):
             date = '/'.join([date[0], date[1], date[2]])
         else:
             date = '/'.join([date[0], date[1], date[2]])      
+
 
         home, home_pts, home_def, home_sie, away, away_pts, away_def, away_sie = matchup(home, away, date, schedule, rotations, injuries)
 
@@ -42,9 +43,7 @@ def create_inputs(year):
             prediction.columns = ['Date', 'Home', 'Home Points', 'Home DRTG', 'Home SIE', 'Away', 'Away Points', 'Away DRTG', 'Away SIE']
             rf_inputs = prediction
     
-
-
-    rf_inputs.to_csv('output/{num}/RF Inputs.csv'.format(num = year))
+    rf_inputs.to_csv(f"output/{year}/RF Inputs{year}.csv")
 
     return rf_inputs
 #%%
@@ -54,11 +53,11 @@ def rf_test(year, gp_weights, rs):
     given a games played weight and a random state input (both as lists). This function was 
     not modified for efficiency, but to just get results.
     '''
-    schedule = pd.read_csv('output/{num}/Schedule{num}.csv'.format(num = year), index_col=0)
+    schedule = pd.read_csv(f"output/{year}/Schedule{year}.csv", index_col=0)
     day      = schedule[schedule['Date'] == '11/20/2022'].index
     schedule = schedule.loc[:day[-1]]
-    dates = schedule['Date'].unique()
-    matchups = pd.read_csv('output/{num}/Caesars_Lines{num}.csv'.format(num = year), index_col=0)
+    dates    = schedule['Date'].unique()
+    matchups = pd.read_csv(f"output/{year}/Caesars_Lines{year}.csv", index_col=0)
     day      = matchups[matchups['Date'] == '11/20/2022'].index
     matchups = matchups.iloc[day[0]:]
     matchup_dates = matchups['Date'].unique()
@@ -89,12 +88,9 @@ def rf_test(year, gp_weights, rs):
         date = ''.join([date, '.csv'])
         dates[i] = date
 
-
     for i in range(len(gp_weights)):
-
-    
         for a in range(len(dates)):
-            directory = 'output/{num}/Seasonal Stats/'.format(num = year)
+            directory = f"output/{year}/Seasonal Stats/"
             location = ''.join([directory, dates[a]])
             rf = pd.read_csv(location, index_col=0)
             mins = rf['Mins'].to_numpy()
@@ -136,7 +132,6 @@ def rf_test(year, gp_weights, rs):
             rf['SIM'] = sim
             rf.to_csv(location)
         
-
         data = create_inputs()
         data_dates = data['Date'].unique()
 
@@ -160,13 +155,12 @@ def rf_test(year, gp_weights, rs):
             cs_results = partial_cs['CS Result'].to_numpy()
             partial_inputs['CS Result'] = cs_results
             
-            
             if a != 0:
                 final_inputs = pd.concat([final_inputs, partial_inputs], ignore_index=True)
             else:
                 final_inputs = partial_inputs
 
-        final_inputs.to_csv('output/{num}/RF Final Inputs.csv'.format(num = year))
+        final_inputs.to_csv(f"output/{year}/RF Final Inputs{year}.csv")
 
         X = final_inputs.drop(['Date', 'Home', 'Away', 'Actual Result', 'CS Result'], axis = 1)
         y = final_inputs['Actual Result']
@@ -216,29 +210,12 @@ def rf_test(year, gp_weights, rs):
             if a != 0:
                 #My device is old and kept crashing so checkpoints were added.
                 weight_outputs = pd.concat([weight_outputs, outputs])
-                directory = 'output/{num}/RF Test Results/'.format(num = year)
-                name_1 = ''.join(['GP', str(gp_weights[i])])
-                name_2 = ''.join(['RS', str(rs[a])])
-                name_2 = ''.join([name_2, '.csv'])
-                name   = '_'.join([name_1, name_2])
-
-                location = ''.join([directory, name])
-                weight_outputs.to_csv(location)
+                weight_outputs.to_csv(f"output/{year}/RF Test Results/GP{gp_weights[i]}_RS{rs[a]}.csv")
             else:
                 weight_outputs = outputs
-                directory = 'output/{num}/RF Test Results/'.format(num = year)
-                name_1 = ''.join(['GP', str(gp_weights[i])])
-                name_2 = ''.join(['RS', str(rs[a])])
-                name_2 = ''.join([name_2, '.csv'])
-                name   = '_'.join([name_1, name_2])
+                weight_outputs.to_csv(f"output/{year}/RF Test Results/GP{gp_weights[i]}_RS{rs[a]}.csv")
 
-                location = ''.join([directory, name])
-                weight_outputs.to_csv(location)
-
-        directory = 'output/{num}/RF Test Results/'.format(num = year)
-        name = ''.join(['GP', str(gp_weights[i]), '.csv'])
-        location = ''.join([directory, name])
-        weight_outputs.to_csv(location)
+        weight_outputs.to_csv(f"output/{year}/RF Test Results/GP{gp_weights[i]}.csv")
 
 #%%
 if __name__=='__main__':

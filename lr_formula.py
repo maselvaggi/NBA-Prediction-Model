@@ -9,7 +9,6 @@ from formula import *
 from rf_formula import create_inputs
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
 from sklearn.utils import resample
 from sklearn.metrics import accuracy_score
 

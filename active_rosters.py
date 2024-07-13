@@ -5,6 +5,8 @@ from tqdm import tqdm
 
 #%%
 def create_active_rosters(year):
+    print((f"                    {year} Active Rosters                     \n"
+           f"==============================================================")) 
     players_in  = pd.read_csv(f"output/{year}/Traditional{year}.csv", index_col=0)
     players_in  = players_in[['Date', 'Team', 'Name']]
     players_out = pd.read_csv(f"output/{year}/Injury_Data{year}.csv'", index_col = 0) #works by not including the index_col = 0 only, no clue as to why
@@ -36,11 +38,11 @@ def create_active_rosters(year):
 
         
         active_roster = active_roster.drop_duplicates()
-        active_roster.to_csv(f"output/{year}/Active Rosters/{date[i]}.csv")
+        active_roster.to_csv(f"output/{year}/Active Rosters/{dates[i]}.csv")
 
 
-    return active_roster
+    return f"{year} active rosters are updated!"
 
 #%%
 if __name__ == '__main__':
-    create_active_rosters()
+    create_active_rosters(2024)

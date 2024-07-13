@@ -2,7 +2,7 @@
 import pandas as pd
 
 #%%
-def get_team_rotations(year):
+def get_team_rotations(adv_year, trad_year):
     """
     Here we are creating the average rotation size per team, per game.
 
@@ -22,9 +22,23 @@ def get_team_rotations(year):
     Last, we round off the rotation size and save that as a .csv file 
     to be used as an input when running the model.  
     """
-    print((f"                   {year} Rotation Size File                     \n"
-           f"=============================================================="))    
-    box_scores = pd.read_csv(f"output/{year}/Advanced{year}.csv", index_col=0)
+
+    #following code will run into issues if you scrape for different years at once.
+    if adv_year == 0 and trad_year == 0:
+        return "No updates made to the Rotation size file."
+    elif adv_year != 0:
+        year = adv_year
+        print((f"                   {adv_year} Rotation Size File                     \n"
+               f"=============================================================="))    
+
+        box_scores = pd.read_csv(f"output/{adv_year}/Advanced{adv_year}.csv", index_col=0)
+    else:
+        year = trad_year
+        print((f"                   {trad_year} Rotation Size File                     \n"
+               f"=============================================================="))    
+
+        box_scores = pd.read_csv(f"output/{trad_year}/Advanced{trad_year}.csv", index_col=0)
+
     box_scores['Date'] = pd.to_datetime(box_scores['Date'], format = '%Y-%m-%d')
     box_scores = box_scores.sort_values(by = ['Date'], ascending = True)
     teams = box_scores['Team'].unique()
@@ -60,7 +74,6 @@ def get_team_rotations(year):
     sma = sma.T
     sma.columns = teams
     sma = sma.iloc[9:]
-
 
     cma = pd.DataFrame(cma)
     cma = cma.T

@@ -6,24 +6,21 @@ from scipy.stats import norm
 from scipy.stats import truncnorm
 
 """
-This code is from the proof of concept model. This needs to be integrated
-with the new code.  This code will be used to run the first backtest.
+This code is run to calculate the final inputs to then actually run the model.
+
+THe following functions were part of the original simple statistical model that
+did not use machine learning. 
 
 """
 #%%
-def get_truncated_normal(mean=1, sd=1, low=0.5, upp=1.5):
-    return truncnorm((low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd)
+def get_truncated_normal(mean, sd, low, high):
+    return truncnorm((low - mean) / sd, (high - mean) / sd, loc=mean, scale=sd)
 
-X = get_truncated_normal(mean=1, sd=1, low= 0.5, upp= 1.5)
+offensive_random_term = get_truncated_normal(mean=1, sd=1, low= 0.5, high= 1.5)
 
-
-def def_truncated_normal(mean=1, sd=1, low=0.95, upp=1.05):
-    return truncnorm((low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd)
-
-Y = def_truncated_normal(mean=1, sd=1, low=0.95, upp=1.05)
+defensive_random_term = get_truncated_normal(mean=1, sd=1, low=0.95, high=1.05)
 
 
-#%%
 #American betting odds for home and away teams
 def USA_home(decimal_home):
     if decimal_home >= 2:
@@ -61,9 +58,7 @@ def odds(df_outcomes, away, home):
     
     american_home = USA_home(decimal_home)
     american_away = USA_away(decimal_away)
-    
-    home, home_spread, implied_home, decimal_home, american_home, away, implied_away, decimal_away, american_away =home, home_spread,implied_home, decimal_home, american_home,away, implied_away,decimal_away,american_away
-    
+
     return home, home_spread, implied_home, decimal_home, american_home, away, implied_away, decimal_away, american_away
 
 #%%
@@ -234,14 +229,16 @@ def matchup(year, home, away, date, schedule, rotations, injuries):
     injuries_temp = injuries[injuries['Date'] == date]
     injuries_away = injuries_temp[injuries_temp['Team'] == away]
     injuries_away = injuries_temp['Name'].unique()
-    home_pts, home_def, home_sim, away_pts, away_def, away_sim = official_projections(season_stats, home, injuries_home, home_rotation, away, injuries_away, away_rotation)   
+    home_pts, home_def, home_sim, away_pts, away_def, away_sim = official_projections(season_stats, home, injuries_home, 
+                                                                                      home_rotation, away, injuries_away, 
+                                                                                      away_rotation)   
         
     return home, home_pts, home_def, home_sim, away, away_pts, away_def, away_sim
 
 #%%
 if __name__=='__main__':
     matchup()
-    official_projections() #
+    official_projections() 
     calculate_mean_player_defensive_rating()
     calculate_away_defensive_rating()
     calculate_home_defensive_rating()

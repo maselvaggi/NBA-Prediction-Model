@@ -20,7 +20,7 @@ def scrape_all_traditional_stats(year):
     if year == 2023 or year == '2023':
         link = 'https://www.nba.com/stats/players/boxscores-traditional?Season=2022-23'
     else:
-        link = 'https://www.nba.com/stats/players/boxscores-traditional'
+        link = 'https://www.nba.com/stats/players/boxscores-traditional?SeasonType=Regular+Season'
 
     driver = webdriver.Chrome()
     driver.get(link)
@@ -28,10 +28,10 @@ def scrape_all_traditional_stats(year):
     driver.implicitly_wait(25)
     #driver.find_element(By.XPATH, '/html/body/div[5]/div[3]/div/div/div/button').click()
     time.sleep(20)
-    driver.find_element(By.XPATH, '/html/body/div[3]/div[2]/div/div[2]/button').click()
+#    driver.find_element(By.XPATH, '/html/body/div[3]/div[2]/div/div[2]/button').click()
     time.sleep(20)
 
-    drop_down = driver.find_element(By.XPATH, '/html/body/div[1]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[3]/div/label/div/select')
+    drop_down = driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[3]/div/label/div/select')
     options = [x for x in drop_down.find_elements(By.TAG_NAME, "option")]
     pages = []
     for element in options:
@@ -41,8 +41,10 @@ def scrape_all_traditional_stats(year):
     tables = []
 
     for i in tqdm(range(1, len(pages))):
+        # table body text
         text = driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[3]/table/tbody').text
         tables.append(text)
+        # right arrow button
         driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[5]/button[2]').click()
         time.sleep(1)
         
@@ -53,8 +55,7 @@ def scrape_all_traditional_stats(year):
             s = "".join(map(str, row))
             file.write(s+'\n')
             
-    trad_all = clean_new_traditional_stats(year)
-    
+    trad_all = clean_new_traditional_stats(year)    
     df_T = pd.DataFrame(trad_all, columns=['Name', 'Team', 'Location', 'Opponent', 'Date', 'Result', 
                                            'Mins', 'Points', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%',
                                            'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'STL', 
@@ -71,7 +72,6 @@ def scrape_all_traditional_stats(year):
             fix_this_date = unique_trad_dates[i]
             fix_this_date = fix_this_date.split('/')
             fixed_date = f"{fix_this_date[2]}-{fix_this_date[0]}-{fix_this_date[1]}"
-
             df_T = df_T.replace(unique_trad_dates[i], fixed_date)
     
     df_T.to_csv(f'output/{year}/Traditional{year}.csv')
@@ -125,20 +125,19 @@ def scrape_new_traditional_stats(year, pages):
     """
     This fucntion does exactly the same as scrape_all_Trad() but you can specify
     how many pages of player box scores you want to scrape.
-
     """
 
     if year == 2023 or year == '2023':
         link = 'https://www.nba.com/stats/players/boxscores-traditional?Season=2022-23'
     else:
-        link = 'https://www.nba.com/stats/players/boxscores-traditional'
+        link = 'https://www.nba.com/stats/players/boxscores-traditional?SeasonType=Regular+Season'
 
     driver = webdriver.Chrome()
     driver.get(link)
     driver.maximize_window()
 
     time.sleep(20)        
-    driver.find_element(By.XPATH, '/html/body/div[3]/div[2]/div/div[2]/button').click()
+#    driver.find_element(By.XPATH, '/html/body/div[3]/div[2]/div/div[2]/button').click()
     time.sleep(20)
     
     drop_down = driver.find_element(By.XPATH, '/html/body/div[1]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[3]/div/label/div/select')
@@ -148,13 +147,14 @@ def scrape_new_traditional_stats(year, pages):
         table_pages.append(element.get_attribute("value"))
 
     if pages > len(table_pages):
-        raise ValueError("The number of pages you entred: {num1} is greater than the number of pages available: {num2}.".format(num1 = pages, num2 = len(table_pages)))    
+        raise ValueError(f"The number of pages you entred: {pages} is greater than the number of pages available: {len(table_pages)}.")    
  
     tables = []
-
     for i in tqdm(range(1, pages+1)):
+        # table body text
         text = driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[3]/table/tbody').text
         tables.append(text)
+        # right arrow button
         driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[5]/button[2]').click()
         time.sleep(1)
         
@@ -171,7 +171,7 @@ def scrape_new_traditional_stats(year, pages):
                                       'Mins', 'Points', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%',
                                        'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 'REB', 'AST', 'STL', 
                                        'BLK', 'TOV', 'PF', 'Plusminus'])
-    
+
     df_T_new[['Mins', 'Points', 'FGM', 'FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'Plusminus' ]] = df_T_new[['Mins', 'Points', 'FGM','FGA',  '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV','PF', 'Plusminus']].apply(pd.to_numeric) 
     df_T_new[['FG%', '3P%', 'FT%']] = df_T_new[['FG%', '3P%', 'FT%']].astype(float)
     
