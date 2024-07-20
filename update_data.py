@@ -7,7 +7,8 @@ from update_statistics import *
 def run_updates(adv_year: int = 0, adv_pages: int = 0, all_adv_pages: bool = False,
                 trad_year: int = 0, trad_pages: int = 0, all_trad_pages: bool = False,
                 seasonal_stats_year: int = 0, get_all_seasonal_stats: bool = False, 
-                espn_game_info_year: int = 0, get_all_espn_game_info: bool = False):
+                espn_game_info_year: int = 0, get_all_espn_game_info: bool = False, 
+                gp_weights: int = .165, dates_to_update=None):
     '''
     This function is meant to be the only piece of code that the user will need to execute. 
 
@@ -40,7 +41,8 @@ def run_updates(adv_year: int = 0, adv_pages: int = 0, all_adv_pages: bool = Fal
     #Advanced, Traditional, Seasonal stats
     print(update_adv_and_trad_stats(adv_year, adv_pages, all_adv_pages, 
                                     trad_year, trad_pages, all_trad_pages, 
-                                    seasonal_stats_year, get_all_seasonal_stats))
+                                    seasonal_stats_year, get_all_seasonal_stats,
+                                    gp_weights, dates_to_update))
 
     #ESPN Game Information
     print(update_espn_game_info(espn_game_info_year, get_all_espn_game_info))
@@ -49,3 +51,8 @@ def run_updates(adv_year: int = 0, adv_pages: int = 0, all_adv_pages: bool = Fal
     print(get_team_rotations(adv_year, trad_year))
 
     return f"Updates are complete." 
+
+#%%
+run_updates(seasonal_stats_year=2023, get_all_seasonal_stats = True)
+
+# %%

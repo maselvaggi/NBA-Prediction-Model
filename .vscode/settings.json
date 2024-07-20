@@ -1,5 +1,8 @@
 {
     "editor.showFoldingControls": "mouseover",
     "notebook.showFoldingControls": "always",
-    "editor.foldingStrategy": "indentation"
+    "editor.foldingStrategy": "indentation",
+    "python.analysis.extraPaths": [
+        "C:\\Users\\Matt Selvaggi\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages"
+    ]
 }
