@@ -53,6 +53,25 @@ def run_updates(adv_year: int = 0, adv_pages: int = 0, all_adv_pages: bool = Fal
     return f"Updates are complete." 
 
 #%%
-run_updates(seasonal_stats_year=2023, get_all_seasonal_stats = True)
+run_updates(trad_year=2017,all_trad_pages=True)
+#%%
+run_updates(seasonal_stats_year=2017, get_all_seasonal_stats=True)
+run_updates(seasonal_stats_year=2018, get_all_seasonal_stats=True)
+run_updates(seasonal_stats_year=2019, get_all_seasonal_stats=True)
+run_updates(seasonal_stats_year=2020, get_all_seasonal_stats=True)
+run_updates(seasonal_stats_year=2021, get_all_seasonal_stats=True)
+run_updates(seasonal_stats_year=2022, get_all_seasonal_stats=True)
 
-# %%
+
+
+#%%
+# stats  = open(f"output/2017/NewAdvancedStats2017.txt")
+# traditional = stats.read()
+# T_game_logs = traditional.split("\n")
+# T_game_logs.pop()
+
+# T_box_scores = []
+# for i in range(len(T_game_logs)):
+#     T_box_scores.append(T_game_logs[i].split(" "))
+
+# T_box_scores = trad_format_rows(T_box_scores)    

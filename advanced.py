@@ -20,10 +20,21 @@ def scrape_all_advanced_stats(year):
     easily parse through the tables of data and save the data in a .csv file and return a 
     dataframe.
     '''
-    if year == 2023 or year == '2023':
-        link = 'https://www.nba.com/stats/players/boxscores-advanced?Season=2022-23'
-    else:
-        link = 'https://www.nba.com/stats/players/boxscores-advanced?SeasonType=Regular+Season'
+    advanced_links = {
+        2024:"https://www.nba.com/stats/players/boxscores-advanced?Season=2023-24&SeasonType=Regular+Season",
+        2023:"https://www.nba.com/stats/players/boxscores-advanced?Season=2022-23&SeasonType=Regular+Season",
+        2022:"https://www.nba.com/stats/players/boxscores-advanced?Season=2021-22&SeasonType=Regular+Season",
+        2021:"https://www.nba.com/stats/players/boxscores-advanced?Season=2020-21&SeasonType=Regular+Season",
+        2020:"https://www.nba.com/stats/players/boxscores-advanced?Season=2019-20&SeasonType=Regular+Season",
+        2019:"https://www.nba.com/stats/players/boxscores-advanced?Season=2018-19&SeasonType=Regular+Season",
+        2018:"https://www.nba.com/stats/players/boxscores-advanced?Season=2017-18&SeasonType=Regular+Season",
+        2017:"https://www.nba.com/stats/players/boxscores-advanced?Season=2016-17&SeasonType=Regular+Season",
+        2016:"https://www.nba.com/stats/players/boxscores-advanced?Season=2015-16&SeasonType=Regular+Season",
+        2015:"https://www.nba.com/stats/players/boxscores-advanced?Season=2014-15&SeasonType=Regular+Season",
+        2014:"https://www.nba.com/stats/players/boxscores-advanced?Season=2013-14&SeasonType=Regular+Season"
+    }
+
+    link = advanced_links[year]      
 
     driver = webdriver.Chrome()
     driver.get(link)
@@ -54,7 +65,7 @@ def scrape_all_advanced_stats(year):
     
     driver.quit()
 
-    with open(f"output/{year}/NewAdvancedStats{year}.txt", 'w') as file:
+    with open(f"output/{year}/NewAdvancedStats{year}.txt", 'w', encoding='utf-8') as file:
         for row in A_tables:
             s = "".join(map(str, row))
             file.write(s+'\n')
@@ -94,7 +105,21 @@ def adv_format_rows(A_box_scores):
         #Some players have a suffix such as Jr., Sr., 'II', 'III', etc
         #When splitting each line by space, those player with a suffix
         #will have an extra element length wise
-        if len(A_box_scores[i]) == 24:
+        if len(A_box_scores[i]) == 23:
+            player.append(A_box_scores[i][0])
+            player.append(A_box_scores[i][1])
+            
+            if A_box_scores[i][3] == "@":
+                player.append("A")
+            else:
+                player.append("H")
+            
+            player.append(A_box_scores[i][4])
+        
+            for j in range(5, len(A_box_scores[i])):
+                player.append(A_box_scores[i][j])
+        
+        elif len(A_box_scores[i]) == 24:
             player.append(A_box_scores[i][0] + " " + A_box_scores[i][1])
             player.append(A_box_scores[i][2])
             
@@ -105,10 +130,10 @@ def adv_format_rows(A_box_scores):
             
             player.append(A_box_scores[i][5])
         
-            for j in range(6, 24):
+            for j in range(6, len(A_box_scores[i])):
                 player.append(A_box_scores[i][j])
-            A_box_scores[i] = player
-        else:
+
+        elif len(A_box_scores[i]) == 25:
             player.append(A_box_scores[i][0] + " " + A_box_scores[i][1] + " " + A_box_scores[i][2])
             player.append(A_box_scores[i][3])
         
@@ -120,8 +145,23 @@ def adv_format_rows(A_box_scores):
             player.append(A_box_scores[i][6])
             for j in range(7, len(A_box_scores[i])):
                 player.append(A_box_scores[i][j])
-        A_box_scores[i] = player    
+
+        elif len(A_box_scores[i]) == 26:
+            player.append(A_box_scores[i][0] + " " + A_box_scores[i][1] + " " + 
+                          A_box_scores[i][2] + " " + A_box_scores[i][3])
+            player.append(A_box_scores[i][4])
         
+            if A_box_scores[i][6] == "@":
+                player.append("A")
+            else:
+                player.append("H")
+            
+            player.append(A_box_scores[i][7])
+            for j in range(8, len(A_box_scores[i])):
+                player.append(A_box_scores[i][j])
+
+        A_box_scores[i] = player    
+
     return A_box_scores
 
 def scrape_new_advanced_stats(year, pages):
@@ -129,11 +169,22 @@ def scrape_new_advanced_stats(year, pages):
     This function scrapes a specified number of pages of advanced stats from NBA.com.
     Remember to toggle the number of pages as you see fit.
     """
-    if year == 2023 or year == '2023':
-        link = 'https://www.nba.com/stats/players/boxscores-advanced?Season=2022-23'
-    else:
-        link = 'https://www.nba.com/stats/players/boxscores-advanced?SeasonType=Regular+Season'
+    advanced_links = {
+        2024:"https://www.nba.com/stats/players/boxscores-advanced?Season=2023-24&SeasonType=Regular+Season",
+        2023:"https://www.nba.com/stats/players/boxscores-advanced?Season=2022-23&SeasonType=Regular+Season",
+        2022:"https://www.nba.com/stats/players/boxscores-advanced?Season=2021-22&SeasonType=Regular+Season",
+        2021:"https://www.nba.com/stats/players/boxscores-advanced?Season=2020-21&SeasonType=Regular+Season",
+        2020:"https://www.nba.com/stats/players/boxscores-advanced?Season=2019-20&SeasonType=Regular+Season",
+        2019:"https://www.nba.com/stats/players/boxscores-advanced?Season=2018-19&SeasonType=Regular+Season",
+        2018:"https://www.nba.com/stats/players/boxscores-advanced?Season=2017-18&SeasonType=Regular+Season",
+        2017:"https://www.nba.com/stats/players/boxscores-advanced?Season=2016-17&SeasonType=Regular+Season",
+        2016:"https://www.nba.com/stats/players/boxscores-advanced?Season=2015-16&SeasonType=Regular+Season",
+        2015:"https://www.nba.com/stats/players/boxscores-advanced?Season=2014-15&SeasonType=Regular+Season",
+        2014:"https://www.nba.com/stats/players/boxscores-advanced?Season=2013-14&SeasonType=Regular+Season"
+    }
 
+    link = advanced_links[year]      
+    
     driver = webdriver.Chrome()
     driver.get(link)
     driver.maximize_window()
@@ -228,7 +279,7 @@ def clean_new_advanced_stats(year):
     in their name or not.  The end goal is to create uniform length lists with which to create
     a dataframe to then save to a .csv. 
     """    
-    advanced = open('output/{num}/NewAdvancedStats{num}.txt'.format(num = year))
+    advanced = open('output/{num}/NewAdvancedStats{num}.txt'.format(num = year), encoding='utf-8')
     advanced = advanced.read()
     A_game_logs = advanced.split("\n")
     A_game_logs.pop()

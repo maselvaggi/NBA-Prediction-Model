@@ -17,10 +17,22 @@ def scrape_all_traditional_stats(year):
     parse through the tables of data and save the data in a .csv file and return a 
     dataframe.
     '''
-    if year == 2023 or year == '2023':
-        link = 'https://www.nba.com/stats/players/boxscores-traditional?Season=2022-23'
-    else:
-        link = 'https://www.nba.com/stats/players/boxscores-traditional?SeasonType=Regular+Season'
+    traditional_links = {
+        2024:"https://www.nba.com/stats/players/boxscores-traditional?Season=2023-24&SeasonType=Regular+Season",
+        2023:"https://www.nba.com/stats/players/boxscores-traditional?Season=2022-23&SeasonType=Regular+Season",
+        2022:"https://www.nba.com/stats/players/boxscores-traditional?Season=2021-22&SeasonType=Regular+Season",
+        2021:"https://www.nba.com/stats/players/boxscores-traditional?Season=2020-21&SeasonType=Regular+Season",
+        2020:"https://www.nba.com/stats/players/boxscores-traditional?Season=2019-20&SeasonType=Regular+Season",
+        2019:"https://www.nba.com/stats/players/boxscores-traditional?Season=2018-19&SeasonType=Regular+Season",
+        2018:"https://www.nba.com/stats/players/boxscores-traditional?Season=2017-18&SeasonType=Regular+Season",
+        2017:"https://www.nba.com/stats/players/boxscores-traditional?Season=2016-17&SeasonType=Regular+Season",
+        2016:"https://www.nba.com/stats/players/boxscores-traditional?Season=2015-16&SeasonType=Regular+Season",
+        2015:"https://www.nba.com/stats/players/boxscores-traditional?Season=2014-15&SeasonType=Regular+Season",
+        2014:"https://www.nba.com/stats/players/boxscores-traditional?Season=2013-14&SeasonType=Regular+Season",
+
+    }
+
+    link = traditional_links[year]
 
     driver = webdriver.Chrome()
     driver.get(link)
@@ -50,7 +62,7 @@ def scrape_all_traditional_stats(year):
         
     driver.quit()
     
-    with open(f'output/{year}/NewTraditionalStats{year}.txt', 'w') as file:
+    with open(f'output/{year}/NewTraditionalStats{year}.txt', 'w', encoding='utf-8') as file:
         for row in tables:
             s = "".join(map(str, row))
             file.write(s+'\n')
@@ -90,6 +102,20 @@ def trad_format_rows(T_box_scores):
         #Some players have a suffix such as Jr., Sr., 'II', 'III', etc
         #When splitting each line by space, those player with a suffix
         #will have an extra element length wise
+        if len(T_box_scores[i]) == 27:
+            player.append(T_box_scores[i][0])
+            player.append(T_box_scores[i][1])
+
+            if T_box_scores[i][3] == "@":
+                player.append("A")
+            else:
+                player.append("H")
+                
+            player.append(T_box_scores[i][4])
+
+            for j in range(5, len(T_box_scores[i])):
+                player.append(T_box_scores[i][j])
+        
         if len(T_box_scores[i]) == 28:
             player.append(T_box_scores[i][0] + " " + T_box_scores[i][1])
             player.append(T_box_scores[i][2])
@@ -101,10 +127,10 @@ def trad_format_rows(T_box_scores):
                 
             player.append(T_box_scores[i][5])
 
-            for j in range(6, 28):
+            for j in range(6, len(T_box_scores[i])):
                 player.append(T_box_scores[i][j])
-            T_box_scores[i] = player
-        else:
+
+        elif len(T_box_scores[i]) == 29:
             player.append(T_box_scores[i][0] + " " + T_box_scores[i][1] + " " + T_box_scores[i][2])
             player.append(T_box_scores[i][3])
 
@@ -116,6 +142,20 @@ def trad_format_rows(T_box_scores):
             player.append(T_box_scores[i][6])
             for j in range(7, len(T_box_scores[i])):
                 player.append(T_box_scores[i][j])
+        elif len(T_box_scores[i]) == 30:
+            player.append(T_box_scores[i][0] + " " + T_box_scores[i][1] + " " + 
+                          T_box_scores[i][2] + " " + T_box_scores[i][3])
+            player.append(T_box_scores[i][4])
+
+            if T_box_scores[i][6] == "@":
+                player.append("A")
+            else:
+                player.append("H")
+
+            player.append(T_box_scores[i][7])
+            for j in range(8, len(T_box_scores[i])):
+                player.append(T_box_scores[i][j])
+
                 
         T_box_scores[i] = player   
     
@@ -126,11 +166,21 @@ def scrape_new_traditional_stats(year, pages):
     This fucntion does exactly the same as scrape_all_Trad() but you can specify
     how many pages of player box scores you want to scrape.
     """
+    traditional_links = {
+        2024:"https://www.nba.com/stats/players/boxscores-traditional?Season=2023-24&SeasonType=Regular+Season",
+        2023:"https://www.nba.com/stats/players/boxscores-traditional?Season=2022-23&SeasonType=Regular+Season",
+        2022:"https://www.nba.com/stats/players/boxscores-traditional?Season=2021-22&SeasonType=Regular+Season",
+        2021:"https://www.nba.com/stats/players/boxscores-traditional?Season=2020-21&SeasonType=Regular+Season",
+        2020:"https://www.nba.com/stats/players/boxscores-traditional?Season=2019-20&SeasonType=Regular+Season",
+        2019:"https://www.nba.com/stats/players/boxscores-traditional?Season=2018-19&SeasonType=Regular+Season",
+        2018:"https://www.nba.com/stats/players/boxscores-traditional?Season=2017-18&SeasonType=Regular+Season",
+        2017:"https://www.nba.com/stats/players/boxscores-traditional?Season=2016-17&SeasonType=Regular+Season",
+        2016:"https://www.nba.com/stats/players/boxscores-traditional?Season=2015-16&SeasonType=Regular+Season",
+        2015:"https://www.nba.com/stats/players/boxscores-traditional?Season=2014-15&SeasonType=Regular+Season",
+        2014:"https://www.nba.com/stats/players/boxscores-traditional?Season=2013-14&SeasonType=Regular+Season"
+    }
 
-    if year == 2023 or year == '2023':
-        link = 'https://www.nba.com/stats/players/boxscores-traditional?Season=2022-23'
-    else:
-        link = 'https://www.nba.com/stats/players/boxscores-traditional?SeasonType=Regular+Season'
+    link = traditional_links[year]    
 
     driver = webdriver.Chrome()
     driver.get(link)
@@ -160,7 +210,7 @@ def scrape_new_traditional_stats(year, pages):
         
     driver.quit()
     
-    with open(f"output/{year}/NewTraditionalStats{year}.txt", 'w') as file:
+    with open(f"output/{year}/NewTraditionalStats{year}.txt", 'w', encoding='utf-8') as file:
         for row in tables:
             s = "".join(map(str, row))
             file.write(s+'\n')
@@ -215,7 +265,7 @@ def scrape_new_traditional_stats(year, pages):
     return df_T_new    
 
 def clean_new_traditional_stats(year):
-    traditional = open(f"output/{year}/NewTraditionalStats{year}.txt")
+    traditional = open(f"output/{year}/NewTraditionalStats{year}.txt", encoding='utf-8')
     traditional = traditional.read()
     T_game_logs = traditional.split("\n")
     T_game_logs.pop()
@@ -232,7 +282,3 @@ def clean_new_traditional_stats(year):
 if __name__ == "__main__":
     scrape_all_traditional_stats()
     scrape_new_traditional_stats()
-
-#%%
-traditional = pd.read_csv("output/2024/Traditional2024.csv", index_col=0)
-traditional['Date'].unique()

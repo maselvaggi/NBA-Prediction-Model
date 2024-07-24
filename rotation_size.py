@@ -2,6 +2,9 @@
 import pandas as pd
 
 #%%
+box_scores = pd.read_csv(f"output/2014/Advanced2014.csv", index_col=0)
+box_scores.head()
+#%%
 def get_team_rotations(adv_year, trad_year):
     """
     Here we are creating the average rotation size per team, per game.

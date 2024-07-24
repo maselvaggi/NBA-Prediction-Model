@@ -7,20 +7,21 @@ from seasonal_stats import *
 def update_adv_and_trad_stats(adv_year, adv_pages, all_adv_pages,  trad_year, trad_pages, all_trad_pages,
                               seasonal_stats_year, get_all_seasonal_stats, gp_weights, dates_to_update,
                               adv_dates = None, trad_dates = None):
-    #Check Inputs
+    
+    #Check ADV Inputs
     if type(adv_year) != int or type(adv_pages) != int:
         raise ValueError("Please enter input for adv_pages/year in the form of an integer.")    
     if type(all_adv_pages) != bool:
         raise ValueError("Please enter boolean input for all_adv_pages.")
-    if adv_year != 2023 and adv_year != 2024 and adv_year != 0:
-        raise ValueError(f"No Advanced Stats data for year: {adv_year}. Please use 2023 or 2024.")
-    
+    if (adv_year < 2014 or adv_year > 2024) and  adv_year != 0:
+        raise ValueError(f"No Advanced Stats data for year: {adv_year}. Please select from [2014-2024].")
+    #Check Trad Inputs
     if type(trad_year) != int or type(trad_pages) != int:
         raise ValueError("Please enter input for traditional pages/year in the form of an integer.")  
     if type(all_trad_pages) != bool:
         raise ValueError("Please enter boolean input for all_trad_pages.")
-    if trad_year != 2023 and trad_year != 2024 and trad_year != 0:
-        raise ValueError('No traditional stats data for year provided. Please use 2023 or 2024.')
+    if (trad_year < 2014 or trad_year > 2024) and trad_year != 0:
+        raise ValueError('No traditional stats data for year provided. Please select from [2014-2024].')
 
     print((f"                   {adv_year} Advanced Stats                        \n"
            f"=============================================================="))
@@ -101,8 +102,6 @@ def update_adv_and_trad_stats(adv_year, adv_pages, all_adv_pages,  trad_year, tr
             seasonal_stats_message = update_seasonal_stats_and_rankings(seasonal_stats_year, get_all_seasonal_stats, gp_weights, trad_dates)
         else:
             if seasonal_stats_year != 0:
-                print((f"                    {seasonal_stats_year} Seasonal Stats                       \n"
-                       f"=============================================================="))
                 seasonal_stats_message = update_seasonal_stats_and_rankings(seasonal_stats_year, get_all_seasonal_stats, gp_weights, dates_to_update)
             else:
                 print((f"                    {seasonal_stats_year} Seasonal Stats                       \n"
@@ -120,8 +119,8 @@ def update_seasonal_stats_and_rankings(seasonal_stats_year, get_all_seasonal_sta
         raise ValueError("Please enter input in the form of an integer.")  
     if type(get_all_seasonal_stats) != bool:
         raise ValueError("Please enter boolean input for get_all_seasonal_stats.")
-    if seasonal_stats_year != 2023 and seasonal_stats_year != 2024 and seasonal_stats_year != 0:
-        raise ValueError('No traditional stats data for year provided. Please use 2023 or 2024.')
+    if (seasonal_stats_year < 2014 or seasonal_stats_year > 2024) and seasonal_stats_year != 0:
+        raise ValueError('No data for year provided. Please use [2014-2024].')
     if seasonal_stats_year == 0:
         return "There were no updates made to the seasonal stats files.\n"
     
@@ -131,8 +130,6 @@ def update_seasonal_stats_and_rankings(seasonal_stats_year, get_all_seasonal_sta
 
     if get_all_seasonal_stats is True:
         dates = advanced['Date'].unique()
-        print("advanced dates length:")
-        print(len(dates))
         for i in tqdm(range(len(dates) - 1)):
             #grab all data up to but not including the date selected.
             trad_marker = traditional[traditional['Date'] == dates[i]].index
