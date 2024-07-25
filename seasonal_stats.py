@@ -99,7 +99,7 @@ def seasonal_stats(year):
     season_stats.to_csv(f"output/{year}/Season_Stats{year}.csv")    
     return season_stats
 
-def daily_seasonal_stats(advanced, traditional, date, year, gp_weights):
+def daily_seasonal_stats(advanced, traditional, date, year):
     players = traditional['Name'].unique()
 
     for i in range(len(players)):
@@ -178,7 +178,20 @@ def daily_seasonal_stats(advanced, traditional, date, year, gp_weights):
                                     'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'OREB', 'DREB', 
                                     'REB', 'AST', 'TOV', 'AST/TO', 'STL', 'BLK', 'EFG%', 'TS%', 'OFFRTG', 
                                     'DEFRTG', 'NETRTG', 'PF', 'Plusminus', 'PIE']
+    
+    season_stats.to_csv(f"output/{year}/Seasonal Stats/{date}.csv")
 
+    return True
+
+
+def daily_player_rankings(date, year, gp_weights):
+    if os.path.exists(f"output/{year}/Seasonal Stats/{date}.csv"):
+        season_stats  = pd.read_csv(f"output/{year}/Seasonal Stats/{date}.csv")
+    else:
+        advanced = pd.read_csv(f"output/{year}/Advanced{year}.csv")
+        traditional = pd.read_csv(f"output/{year}/Traditional{year}.csv")
+        daily_seasonal_stats(advanced, traditional, date, year)
+        season_stats  = pd.read_csv(f"output/{year}/Seasonal Stats/{date}.csv")
 
     #remove players w/o enough data
     season_stats = season_stats[(season_stats["GP"] >= 10) & (season_stats["Mins"] >= 10) & 
@@ -215,7 +228,8 @@ def daily_seasonal_stats(advanced, traditional, date, year, gp_weights):
 
         season_stats['SIM'] = sim
 
-        season_stats = season_stats.sort_values(by=['SIM'], ascending=[False], ignore_index=True)        
+        season_stats = season_stats.sort_values(by=['SIM'], ascending=[False], ignore_index=True)  
+        season_stats = season_stats[["Name","S_Mins","S_GP", "S_PPM","S_NETRTG","SIM"]]      
         season_stats.to_csv(f"output/{year}/Player Rankings/{date}.csv")
 
         return True
@@ -223,7 +237,11 @@ def daily_seasonal_stats(advanced, traditional, date, year, gp_weights):
     else:
         print(f"There are no rankings available for {date}, not enough data.")
         return True
+
 #%%
 if __name__ == "__main__":
     seasonal_stats()
     daily_seasonal_stats()
+    daily_player_rankings()
+
+#%%

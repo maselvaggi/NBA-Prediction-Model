@@ -5,8 +5,8 @@ from seasonal_stats import *
 
 #%%
 def update_adv_and_trad_stats(adv_year, adv_pages, all_adv_pages,  trad_year, trad_pages, all_trad_pages,
-                              seasonal_stats_year, get_all_seasonal_stats, gp_weights, dates_to_update,
-                              adv_dates = None, trad_dates = None):
+                              seasonal_stats_year, get_all_seasonal_stats, player_rankings_year, 
+                              get_all_player_rankings,gp_weights, dates_to_update, adv_dates = None, trad_dates = None):
     
     #Check ADV Inputs
     if type(adv_year) != int or type(adv_pages) != int:
@@ -94,15 +94,24 @@ def update_adv_and_trad_stats(adv_year, adv_pages, all_adv_pages,  trad_year, tr
             all_dates = np.concatenate([adv_dates, trad_dates])
             all_dates = np.unique(all_dates)
 
-            seasonal_stats_message = update_seasonal_stats_and_rankings(seasonal_stats_year, get_all_seasonal_stats, gp_weights, all_dates)
+            seasonal_stats_message = update_seasonal_stats_and_rankings(seasonal_stats_year, get_all_seasonal_stats, player_rankings_year, 
+                                                                        get_all_player_rankings,gp_weights, all_dates)
         else:
-            seasonal_stats_message = update_seasonal_stats_and_rankings(seasonal_stats_year, get_all_seasonal_stats, gp_weights, adv_dates)
+            seasonal_stats_message = update_seasonal_stats_and_rankings(seasonal_stats_year, get_all_seasonal_stats, player_rankings_year, 
+                                                                        get_all_player_rankings,gp_weights, adv_dates)
     else:
         if trad_dates is not None:
-            seasonal_stats_message = update_seasonal_stats_and_rankings(seasonal_stats_year, get_all_seasonal_stats, gp_weights, trad_dates)
+            seasonal_stats_message = update_seasonal_stats_and_rankings(seasonal_stats_year, get_all_seasonal_stats, player_rankings_year, 
+                                                                        get_all_player_rankings,gp_weights, trad_dates)
         else:
             if seasonal_stats_year != 0:
-                seasonal_stats_message = update_seasonal_stats_and_rankings(seasonal_stats_year, get_all_seasonal_stats, gp_weights, dates_to_update)
+                seasonal_stats_message = update_seasonal_stats_and_rankings(seasonal_stats_year, get_all_seasonal_stats, player_rankings_year, 
+                                                                            get_all_player_rankings, gp_weights, dates_to_update)
+            elif seasonal_stats_year == 0 and player_rankings_year != 0:
+                advanced      = pd.read_csv(f"output/{player_rankings_year}/Advanced{player_rankings_year}.csv", index_col = 0)
+                dates_to_update = advanced["Date"].unique()    
+                seasonal_stats_message = update_seasonal_stats_and_rankings(seasonal_stats_year, get_all_seasonal_stats, player_rankings_year, 
+                                                                            get_all_player_rankings, gp_weights, dates_to_update)
             else:
                 print((f"                    {seasonal_stats_year} Seasonal Stats                       \n"
                        f"=============================================================="))                
@@ -110,9 +119,15 @@ def update_adv_and_trad_stats(adv_year, adv_pages, all_adv_pages,  trad_year, tr
     
     return seasonal_stats_message
     
-def update_seasonal_stats_and_rankings(seasonal_stats_year, get_all_seasonal_stats, gp_weights, dates_to_update):
-    print((f"                      {seasonal_stats_year} Seasonal Stats                       \n"
-           f"=============================================================="))
+def update_seasonal_stats_and_rankings(seasonal_stats_year, get_all_seasonal_stats, player_rankings_year,
+                                       get_all_player_rankings,gp_weights, dates_to_update):
+    if seasonal_stats != 0:
+        print((f"                  {seasonal_stats_year} Seasonal Stats/Rankings                       \n"
+               f"=============================================================="))
+    else:
+        print((f"                  {player_rankings_year} Seasonal Stats/Rankings                       \n"
+               f"=============================================================="))
+
     if dates_to_update is None and get_all_seasonal_stats is False:
         return "No seasonal stat files to update.\n"
     if type(seasonal_stats_year) != int:
@@ -121,38 +136,61 @@ def update_seasonal_stats_and_rankings(seasonal_stats_year, get_all_seasonal_sta
         raise ValueError("Please enter boolean input for get_all_seasonal_stats.")
     if (seasonal_stats_year < 2014 or seasonal_stats_year > 2024) and seasonal_stats_year != 0:
         raise ValueError('No data for year provided. Please use [2014-2024].')
-    if seasonal_stats_year == 0:
-        return "There were no updates made to the seasonal stats files.\n"
+    if seasonal_stats_year == 0 and player_rankings_year == 0:
+        return "There were no updates made to the seasonal stats/player rankings files files.\n"
     
     files_updated = 0
-    traditional   = pd.read_csv(f"output/{seasonal_stats_year}/Traditional{seasonal_stats_year}.csv", index_col = 0)
-    advanced      = pd.read_csv(f"output/{seasonal_stats_year}/Advanced{seasonal_stats_year}.csv", index_col = 0)
+    if seasonal_stats_year != 0:
+        traditional   = pd.read_csv(f"output/{seasonal_stats_year}/Traditional{seasonal_stats_year}.csv", index_col = 0)
+        advanced      = pd.read_csv(f"output/{seasonal_stats_year}/Advanced{seasonal_stats_year}.csv", index_col = 0)
 
     if get_all_seasonal_stats is True:
-        dates = advanced['Date'].unique()
-        for i in tqdm(range(len(dates) - 1)):
-            #grab all data up to but not including the date selected.
-            trad_marker = traditional[traditional['Date'] == dates[i]].index
-            partial_traditional_stats = traditional.iloc[trad_marker[-1]+1:]
+        if get_all_player_rankings is True:
+            dates = advanced['Date'].unique()
+            for i in tqdm(range(len(dates) - 1)):
+                #grab all data up to but not including the date selected.
+                trad_marker = traditional[traditional['Date'] == dates[i]].index
+                partial_traditional_stats = traditional.iloc[trad_marker[-1]+1:]
 
-            adv_marker = advanced[advanced['Date'] == dates[i]].index
-            partial_advanced_stats = advanced.iloc[adv_marker[-1]+1:]
-            daily_seasonal_stats(partial_advanced_stats, partial_traditional_stats, dates[i], seasonal_stats_year, gp_weights)
+                adv_marker = advanced[advanced['Date'] == dates[i]].index
+                partial_advanced_stats = advanced.iloc[adv_marker[-1]+1:]
+                daily_seasonal_stats(partial_advanced_stats, partial_traditional_stats, dates[i], seasonal_stats_year)
+                daily_player_rankings(dates[i], player_rankings_year, gp_weights)
+                files_updated += 1
+        else:
+            dates = advanced['Date'].unique()
+            for i in tqdm(range(len(dates) - 1)):
+                #grab all data up to but not including the date selected.
+                trad_marker = traditional[traditional['Date'] == dates[i]].index
+                partial_traditional_stats = traditional.iloc[trad_marker[-1]+1:]
 
-            files_updated += 1
+                adv_marker = advanced[advanced['Date'] == dates[i]].index
+                partial_advanced_stats = advanced.iloc[adv_marker[-1]+1:]
+                daily_seasonal_stats(partial_advanced_stats, partial_traditional_stats, dates[i], seasonal_stats_year)
+                files_updated += 1
 
         return f"There were {files_updated} files updated in the {seasonal_stats_year} season stats folder.\n"
     else:
-        for i in tqdm(range(1, len(dates_to_update)+1)):
-            #grab all data up to but not including the date selected.
-            trad_marker = traditional[traditional['Date'] == dates_to_update[-i]].index
-            partial_traditional_stats = traditional.iloc[trad_marker[-1]+1:]
+        if get_all_seasonal_stats is False and get_all_player_rankings is False:
+            for i in tqdm(range(1, len(dates_to_update)+1)):
+                #grab all data up to but not including the date selected.
+                trad_marker = traditional[traditional['Date'] == dates_to_update[-i]].index
+                partial_traditional_stats = traditional.iloc[trad_marker[-1]+1:]
 
-            adv_marker = advanced[advanced['Date'] == dates_to_update[-i]].index
-            partial_advanced_stats = advanced.iloc[adv_marker[-1]+1:]
-            daily_seasonal_stats(partial_advanced_stats, partial_traditional_stats, dates_to_update[-i], seasonal_stats_year, gp_weights)
+                adv_marker = advanced[advanced['Date'] == dates_to_update[-i]].index
+                partial_advanced_stats = advanced.iloc[adv_marker[-1]+1:]
 
-            files_updated += 1            
+                daily_seasonal_stats(partial_advanced_stats, partial_traditional_stats, dates_to_update[-i], seasonal_stats_year)
+                daily_player_rankings(dates[i], player_rankings_year, gp_weights)
+                files_updated += 1     
+
+        if get_all_player_rankings is True:
+            traditional   = pd.read_csv(f"output/{player_rankings_year}/Traditional{player_rankings_year}.csv", index_col = 0)
+            advanced      = pd.read_csv(f"output/{player_rankings_year}/Advanced{player_rankings_year}.csv", index_col = 0)
+
+            dates = advanced["Date"].unique()
+            for i in tqdm(range(len(dates) - 1)):
+                daily_player_rankings(dates[i], player_rankings_year, gp_weights)
 
         return f"There were {files_updated} files updated in the {seasonal_stats_year} season stats folder.\n"
 
